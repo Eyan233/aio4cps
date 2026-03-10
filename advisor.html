@@ -19,6 +19,52 @@
 <script defer src="assets/js/main.js"></script>
 <!-- Baidu site verification: add meta or HTML file after you register on https://ziyuan.baidu.com -->
 
+<style>
+  .advisor-profile{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .advisor-photo{
+    width:160px;
+    flex:0 0 160px;
+  }
+
+  .advisor-photo img{
+    width:100%;
+    aspect-ratio:3/4;
+    object-fit:cover;
+    border-radius:16px;
+    display:block;
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    background:#fff;
+  }
+
+  .advisor-info{
+    flex:1 1 320px;
+    min-width:260px;
+  }
+
+  @media (max-width: 640px){
+    .advisor-profile{
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .advisor-photo{
+      width:140px;
+      flex:0 0 auto;
+    }
+
+    .advisor-info{
+      width:100%;
+    }
+  }
+</style>
+
 </head>
 <body>
 
@@ -29,7 +75,7 @@
         <img src="assets/img/logo.png" alt="AIO4CPS logo">
         <div>
           <div class="t1">AIO4CPS Group</div>
-          <div class="t2">AI & Optimization for Cyber‑Physical Systems · CQU</div>
+          <div class="t2">AI & Optimization for Cyber-Physical Systems · CQU</div>
         </div>
       </a>
 
@@ -64,7 +110,6 @@
   </div>
 </div>
 
-
 <section class="section" style="padding-top:46px">
   <div class="container">
     <h2 class="reveal">导师介绍 · 蒋胜龙</h2>
@@ -72,24 +117,35 @@
 
     <div class="grid2">
       <div class="card" style="padding:18px">
-        <h3 class="reveal" style="margin:0 0 8px">基本信息</h3>
-        <div class="reveal" style="color:var(--muted); line-height:1.75">
-          <div><b style="color:var(--text)">单位</b>：重庆大学 自动化学院</div>
-          <div><b style="color:var(--text)">学科</b>：系统工程</div>
-          <div><b style="color:var(--text)">办公地点</b>：虎溪校区信息技术科研楼A2106</div>
-          <div><b style="color:var(--text)">邮箱</b>：<a href="mailto:jiang_shl@cqu.edu.cn" style="text-decoration:underline; text-decoration-color:rgba(255,255,255,.22)">jiang_shl@cqu.edu.cn</a></div>
-          <div><b style="color:var(--text)">课程</b>：自适应控制</div>
-        </div>
+        <div class="advisor-profile">
+          <div class="advisor-photo reveal">
+            <img src="assets/img/teacher.png" alt="蒋胜龙老师照片">
+          </div>
 
-        <div style="margin-top:14px" class="reveal">
-          <div class="kicker"><span class="dot"></span><span>Research Keywords</span></div>
-          <div style="margin-top:10px" class="badges">
-            <span class="badge">Scheduling</span>
-            <span class="badge">Robust/Chance-Constrained Optimization</span>
-            <span class="badge">Multi-objective Evolutionary Computation</span>
-            <span class="badge">Industrial CPS</span>
-            <span class="badge">Soft Decision</span>
-            <span class="badge">Reinforcement Learning</span>
+          <div class="advisor-info">
+            <h3 class="reveal" style="margin:0 0 8px">基本信息</h3>
+            <div class="reveal" style="color:var(--muted); line-height:1.75">
+              <div><b style="color:var(--text)">姓名</b>：蒋胜龙</div>
+              <div><b style="color:var(--text)">单位</b>：重庆大学 自动化学院</div>
+              <div><b style="color:var(--text)">学科</b>：系统工程</div>
+              <div><b style="color:var(--text)">职称</b>：副教授</div>
+              <div><b style="color:var(--text)">导师身份</b>：博士生导师</div>
+              <div><b style="color:var(--text)">办公地点</b>：虎溪校区信息技术科研楼A2106</div>
+              <div><b style="color:var(--text)">邮箱</b>：<a href="mailto:jiang_shl@cqu.edu.cn" style="text-decoration:underline; text-decoration-color:rgba(255,255,255,.22)">jiang_shl@cqu.edu.cn</a></div>
+              <div><b style="color:var(--text)">课程</b>：自适应控制</div>
+            </div>
+
+            <div style="margin-top:14px" class="reveal">
+              <div class="kicker"><span class="dot"></span><span>Research Keywords</span></div>
+              <div style="margin-top:10px" class="badges">
+                <span class="badge">Scheduling</span>
+                <span class="badge">Robust/Chance-Constrained Optimization</span>
+                <span class="badge">Multi-objective Evolutionary Computation</span>
+                <span class="badge">Industrial CPS</span>
+                <span class="badge">Soft Decision</span>
+                <span class="badge">Reinforcement Learning</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -139,7 +195,6 @@
     </div>
   </div>
 </section>
-
 
 <div class="footer">
   <div class="container">
