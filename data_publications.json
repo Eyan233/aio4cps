@@ -1,1 +1,713 @@
-[]
+{
+  "team": {
+    "name_cn": "aio4cps课题组",
+    "name_en": "AIO4CPS Research Group",
+    "short_name": "AIO4CPS Lab",
+    "affiliation": "重庆大学自动化学院",
+    "email": "jiang_shl@cqu.edu.cn"
+  },
+  "advisor": {
+    "name": "蒋胜龙",
+    "affiliation": "重庆大学自动化学院",
+    "title": "副教授",
+    "email": "jiang_shl@cqu.edu.cn",
+    "research_fields": [
+      "不确定优化",
+      "深度强化学习",
+      "信息物理系统",
+      "智能制造与交通"
+    ]
+  },
+  "selected_publications": [
+    {
+      "year": "2026",
+      "title": "A Data-Driven Multi-objective Differential Evolution Framework for Charging-Thermal Coupled Parameter Optimization in Rotary Hearth Furnace Operations",
+      "venue": "Swarm and Evolutionary Computation",
+      "authors": "Luo Q, Jiang S L*, Chiong R, Lv X",
+      "summary": "面向转底炉充放电热耦合参数优化问题，构建数据驱动的多目标差分进化框架，提升复杂工艺条件下的参数寻优能力。",
+      "badges": [
+        "转底炉优化",
+        "多目标进化",
+        "2026"
+      ],
+      "link": ""
+    },
+    {
+      "year": "2025",
+      "title": "An online learning-based mACO approach for hot rolling scheduling problems involving dynamic order arrivals",
+      "venue": "IEEE Transactions on Automation Science and Engineering",
+      "authors": "Jiang S L, Cao L, Liu Q*, et al.",
+      "summary": "针对动态订单到达下的热轧调度问题，构建融合在线学习的多目标蚁群优化方法，以提升变化环境中的求解质量与响应能力。",
+      "badges": [
+        "热轧调度",
+        "在线学习",
+        "2025"
+      ],
+      "link": "https://doi.org/10.1109/TASE.2025.3540042"
+    },
+    {
+      "year": "2025",
+      "title": "A learning-guided MOEA for energy-oriented hybrid flow shop scheduling with limited buffers",
+      "venue": "Information Sciences",
+      "authors": "He L, Jiang S L*, Sun L, Chiong R",
+      "summary": "面向能耗导向且带有限缓冲区的混合流水车间调度问题，提出学习引导的多目标进化算法，兼顾延迟与非加工能耗优化。",
+      "badges": [
+        "混合流水车间",
+        "MOEA",
+        "2025"
+      ],
+      "link": "https://doi.org/10.1016/j.ins.2025.122884"
+    },
+    {
+      "year": "2025",
+      "title": "A learning-enhanced ant colony optimization algorithm for integrated planning and scheduling in hot rolling production lines under uncertainty",
+      "venue": "Swarm and Evolutionary Computation",
+      "authors": "Jiang S L*, He L, Cao L, et al.",
+      "summary": "将热轧计划与调度统一于机会约束框架下，通过学习增强的蚁群优化实现不确定条件下的一体化协同优化。",
+      "badges": [
+        "计划调度一体化",
+        "ACO",
+        "2025"
+      ],
+      "link": "https://doi.org/10.1016/j.swevo.2025.101851"
+    },
+    {
+      "year": "2025",
+      "title": "基于分层强化学习的天车调度优化方法",
+      "venue": "控制理论与应用",
+      "authors": "苏章圣，蒋胜龙*，彭功状，梁越永",
+      "summary": "面向炼钢流程中的天车调度问题，采用分层强化学习框架提升复杂约束下的决策效率与调度效果。",
+      "badges": [
+        "分层强化学习",
+        "天车调度",
+        "2025"
+      ],
+      "link": "https://doi.org/10.7641/CTA.2025.50167"
+    },
+    {
+      "year": "2023",
+      "title": "Plant-wide byproduct gas distribution under uncertainty in iron and steel industry via quantile forecasting and robust optimization",
+      "venue": "Applied Energy",
+      "authors": "Jiang S L*, Wang M, Bogle I D L",
+      "summary": "融合分位数预测与鲁棒优化，实现钢铁流程副产煤气在不确定环境下的全厂协同分配，体现能源系统优化方向成果。",
+      "badges": [
+        "能源系统优化",
+        "鲁棒优化",
+        "2023"
+      ],
+      "link": "https://doi.org/10.1016/j.apenergy.2023.121603"
+    }
+  ],
+  "journal_papers": [
+    "[1] Luo Q, Jiang S L*, Chiong R, Lv X. A Data-Driven Multi-objective Differential Evolution Framework for Charging-Thermal Coupled Parameter Optimization in Rotary Hearth Furnace Operations [J]. Swarm and Evolutionary Computation, 2026.",
+    "[2] He L, Jiang S L*, Sun L, Chiong R. A learning-guided MOEA for energy-oriented hybrid flow shop scheduling with limited buffers [J]. Information Sciences, 2025: 122884.",
+    "[3] Liu Q, Zhu L, Hou R, Jiang S L*, Chai Y, Liu M. Stochastic Sparse Bayesian Identification for Nonlinear Systems from Large Dataset [J]. IEEE Transactions on Instrumentation and Measurement, 2025: 6508211.",
+    "[4] Jiang S L, Cao L, Liu Q*, et al. An online learning-based mACO approach for hot rolling scheduling problems involving dynamic order arrivals [J]. IEEE Transactions on Automation Science and Engineering, 2025, 22: 12322-12335.",
+    "[5] Jiang S L*, He L, Cao L, et al. A learning-enhanced ant colony optimization algorithm for integrated planning and scheduling in hot rolling production lines under uncertainty [J]. Swarm and Evolutionary Computation, 2025, 93: 101851.",
+    "[6] Jiang S L*. A soft encoding-based evolutionary algorithm for the steelmaking scheduling problem and its extension under energy thresholds [J]. Computers & Operations Research, 2024: 106885.",
+    "[7] Chen L, Cao L, Wen Y, Jiang S L*. A knowledge-based NSGA-II algorithm for multi-objective hot rolling production scheduling under flexible time-of-use electricity pricing [J]. Journal of Manufacturing Systems, 2023, 69: 255-270.",
+    "[8] Jiang S L*, Wang M, Bogle I D L. Plant-wide byproduct gas distribution under uncertainty in iron and steel industry via quantile forecasting and robust optimization [J]. Applied Energy, 2023, 350(15): 121603.",
+    "[9] Jiang S L*, Peng G, Bogle I D L, et al. Two-stage robust optimization approach for flexible oxygen distribution under uncertainty in integrated iron and steel plants [J]. Applied Energy, 2022, 306: 118022.",
+    "[10] Jiang S L*, Li W, Zhang X, et al. An improved Pareto local search for solving bi-objective scheduling problems in hot rolling mills [J]. Computers & Industrial Engineering, 2022, 172: 108561.",
+    "[11] Jiang S L*, Xu C, Zhang L, et al. A decomposition-based two-stage online scheduling approach and its integrated system in the hybrid flow shop of steel industry [J]. Expert Systems with Applications, 2022: 119200.",
+    "[12] Jiang S L*, Liu Q, Bogle I D L, et al. A Self-Learning Based Dynamic Multi-Objective Evolutionary Algorithm for Resilient Scheduling Problems in Steelmaking Plants [J]. IEEE Transactions on Automation Science and Engineering, 2022, 20(2): 832-845.",
+    "[13] Jiang S L*, Zheng Z, Liu M. A preference-inspired multi-objective soft scheduling algorithm for the practical steelmaking-continuous casting production [J]. Computers & Industrial Engineering, 2018, 115: 582-594.",
+    "[14] Jiang S L*, Zheng Z, Liu M. A multi-stage dynamic soft scheduling algorithm for the uncertain steelmaking-continuous casting scheduling problem [J]. Applied Soft Computing, 2017, 60: 722-736.",
+    "[15] Jiang S L*, Liu M, Lin J, et al. A prediction-based online soft scheduling algorithm for the real-world steelmaking-continuous casting production [J]. Knowledge-Based Systems, 2016, 111: 159-172.",
+    "[16] Jiang S L*, Liu M, Hao J. A two-phase soft optimization method for the uncertain scheduling problem in the steelmaking industry [J]. IEEE Transactions on Systems, Man, and Cybernetics: Systems, 2016, 47(3): 416-431.",
+    "[17] Jiang S L*, Liu M, Hao J, et al. A bi-layer optimization approach for a hybrid flow shop scheduling problem involving controllable processing times in the steelmaking industry [J]. Computers & Industrial Engineering, 2015, 87: 518-531.",
+    "[18] 孙棣华*，蒋胜龙*，高博麟，赵敏，林景栋，肖雅月，梁浩，李克强. 智能网联汽车信息物理系统研究进展 [J]. 汽车工程，2026.",
+    "[19] 苏章圣，蒋胜龙*，彭功状，梁越永. 基于分层强化学习的天车调度优化方法 [J]. 控制理论与应用，2025, 42(11): 2261-2273.",
+    "[20] 蒋胜龙*，文耀民，陈兰，等. 不确定条件下炼钢-连铸生产调度的两阶段鲁棒优化方法 [J]. 控制与决策, 2023, 38(12): 3516-3524.",
+    "[21] 蒋胜龙*，文耀民，唐伟，等. 一种考虑能源约束的炼钢-连铸调度优化方法 [J]. 华中科技大学学报(自然科学版), 2022, 50(06): 118-123+132.",
+    "[22] 蒋胜龙*，郑忠. 考虑不确定加工时间的炼钢-连铸过程柔性调度方法 [J]. 计算机集成制造系统, 2019, 25(1): 103-114.",
+    "[23] 蒋胜龙，郑忠*，高小强，等. 基于 UML 的炼钢物流仿真系统分析与设计 [J]. 系统仿真学报, 2007, 19(16): 3676-3679."
+  ],
+  "conference_papers": [
+    "[1] Sun L, Su Z, Jiang S L*. A Learning-based Multi-Objective BRKGA for Steelmaking-Continuous Casting Scheduling with Transportation Thresholds. The 43rd Chinese Control Conference (CCC), IEEE, 2025.",
+    "[2] Luo Q, Jiang S L*, You Z, et al. An XGBoost-Based Model for Temperature Prediction in Rotary Hearth Furnaces: Incorporating Mechanistic and Temporal Factors. The 10th International Congress on the Science and Technology of Steelmaking (ICS2025).",
+    "[3] Tang W, Cao L, Wen Y, Jiang S L*. A bi-level optimization method for integrated production scheduling between continuous casting and hot rolling processes. 2022 18th International Conference on Automation Science and Engineering (CASE), IEEE, 2022. (Oral)",
+    "[4] Jiang S L*, Tang W, Hu W. A CMA-ES algorithm for solving the steelmaking scheduling problem involving time buffers. 2020 IEEE Congress on Evolutionary Computation (CEC), IEEE, 2020.",
+    "[5] Jiang S L*, Liu Q. An adaptive sampling-estimation of distribution algorithm for robust scheduling in the steelmaking-continuous casting process. 2017 13th International Conference on Automation Science and Engineering (CASE), IEEE, 2017.",
+    "[6] Jiang S L, Liu M*, Hao J. A modified RBM-based estimation of distribution algorithm for steelmaking-continuous casting scheduling. Proceedings of the 11th World Congress on Intelligent Control and Automation (WCICA), IEEE, 2014."
+  ],
+  "selected_projects": [
+    {
+      "title": "信息物理融合驱动的自动驾驶仿真场景智能生成及多指标协同优化",
+      "fund": "智能汽车安全技术全国重点实验室开放基金",
+      "code": "IVSTSKL-202515",
+      "period": "2026.01–2026.12",
+      "status": "在研",
+      "summary": "围绕自动驾驶仿真场景生成与多指标协同优化展开研究，服务于智能网联交通场景的验证、评估与测试。"
+    },
+    {
+      "title": "多能耦合钢铁生产动态柔性调控智能化关键技术研究及应用",
+      "fund": "国家自然科学基金重大研究计划项目（培育）",
+      "code": "92367106",
+      "period": "2024.01–2026.12",
+      "status": "在研",
+      "summary": "围绕多能耦合钢铁生产中的动态柔性调控问题，研究能流、物流与调度协同优化关键技术。"
+    },
+    {
+      "title": "（转底炉）全流程物质流能量流耦合规律与协同优化",
+      "fund": "国家重点研发项目课题",
+      "code": "2022YFC3901404",
+      "period": "2022.11–2025.12",
+      "status": "在研",
+      "summary": "聚焦转底炉全流程物质流与能量流耦合规律，推进过程优化与协同调控研究。"
+    },
+    {
+      "title": "铁钢联合生产调度的柔性协同与仿真优化系统研发",
+      "fund": "重庆中冶赛迪合作科研项目",
+      "code": "",
+      "period": "2026.01–2027.12",
+      "status": "在研",
+      "summary": "面向铁钢联合生产系统，开展柔性协同调度与仿真优化系统研发。"
+    }
+  ],
+  "projects": [
+    {
+      "title": "信息物理融合驱动的自动驾驶仿真场景智能生成及多指标协同优化",
+      "fund": "智能汽车安全技术全国重点实验室开放基金",
+      "code": "IVSTSKL-202515",
+      "period": "2026.01–2026.12",
+      "status": "在研",
+      "summary": "围绕自动驾驶仿真场景生成与多指标协同优化展开研究，服务于智能网联交通场景的验证、评估与测试。"
+    },
+    {
+      "title": "面向智能网联汽车测试场景生成的多目标优化方法",
+      "fund": "人社部国家外国专家项目",
+      "code": "H20251068",
+      "period": "2025.01–2026.12",
+      "status": "在研",
+      "summary": "面向智能网联汽车测试场景生成问题，研究多目标优化方法与场景构建策略。"
+    },
+    {
+      "title": "多能耦合钢铁生产动态柔性调控智能化关键技术研究及应用",
+      "fund": "国家自然科学基金重大研究计划项目（培育）",
+      "code": "92367106",
+      "period": "2024.01–2026.12",
+      "status": "在研",
+      "summary": "围绕多能耦合钢铁生产中的动态柔性调控问题，研究能流、物流与调度协同优化关键技术。"
+    },
+    {
+      "title": "（转底炉）全流程物质流能量流耦合规律与协同优化",
+      "fund": "国家重点研发项目课题",
+      "code": "2022YFC3901404",
+      "period": "2022.11–2025.12",
+      "status": "在研",
+      "summary": "聚焦转底炉全流程物质流与能量流耦合规律，推进过程优化与协同调控研究。"
+    },
+    {
+      "title": "强不确定条件下连铸-热轧生产线基于软决策机制的调度方法研究",
+      "fund": "国家自然科学基金面上项目",
+      "code": "61873042",
+      "period": "2019.01–2022.12",
+      "status": "结题",
+      "summary": "围绕强不确定条件下的连铸—热轧生产线，研究基于软决策机制的调度方法。"
+    },
+    {
+      "title": "考虑高维多目标的热轧生产线智能优化排产方法研究",
+      "fund": "冶金自动化与检测技术教育部工程研究中心开放基金（重点项目）",
+      "code": "MADTOF2021A01",
+      "period": "2022.01–2023.12",
+      "status": "结题",
+      "summary": "研究面向高维多目标条件的热轧生产线智能优化排产方法。"
+    },
+    {
+      "title": "铁钢联合生产调度的柔性协同与仿真优化系统研发",
+      "fund": "重庆中冶赛迪合作科研项目",
+      "code": "",
+      "period": "2026.01–2027.12",
+      "status": "在研",
+      "summary": "面向铁钢联合生产系统，开展柔性协同调度与仿真优化系统研发。"
+    },
+    {
+      "title": "炼钢车间物流仿真平台开发",
+      "fund": "重庆中冶赛迪合作科研项目",
+      "code": "",
+      "period": "2024.01–2025.10",
+      "status": "结题",
+      "summary": "围绕炼钢车间物流场景，开展仿真平台开发与系统验证。"
+    },
+    {
+      "title": "铁水智能调度模型与算法研究",
+      "fund": "重庆赛迪奇智合作科研项目",
+      "code": "",
+      "period": "2024.01–2025.10",
+      "status": "结题",
+      "summary": "研究面向铁水运输与调度过程的模型构建与智能算法。"
+    },
+    {
+      "title": "韶钢炼钢生产智能管控系统",
+      "fund": "北京冶金自动化院合作科研项目",
+      "code": "",
+      "period": "已结题",
+      "status": "结题",
+      "summary": "面向实际钢铁生产场景推进智能管控系统研究与应用。"
+    },
+    {
+      "title": "河冶科技智能调度仿真平台",
+      "fund": "北京冶金自动化院合作科研项目",
+      "code": "",
+      "period": "已结题",
+      "status": "结题",
+      "summary": "围绕工业调度场景建设智能调度仿真平台。"
+    },
+    {
+      "title": "沙钢转炉特钢智能调度系统",
+      "fund": "北京冶金自动化院合作科研项目",
+      "code": "",
+      "period": "已结题",
+      "status": "结题",
+      "summary": "面向转炉特钢场景开展智能调度系统研发。"
+    }
+  ],
+  "selected_ip": [
+    {
+      "title": "考虑订单动态到达的多目标热轧生产调度方法及系统",
+      "type": "发明专利",
+      "date": "2024.11.15",
+      "status": "已授权",
+      "code": "ZL202410149329.8",
+      "summary": "针对订单动态到达场景提出多目标热轧生产调度方法及系统。"
+    },
+    {
+      "title": "基于蚁群优化的热轧生产线集成计划与调度方法及系统",
+      "type": "发明专利",
+      "date": "2025.01.28",
+      "status": "已授权",
+      "code": "ZL202410200753.0",
+      "summary": "面向热轧生产线集成计划与调度的一体化优化方法及系统。"
+    },
+    {
+      "title": "基于数字孪生的炼钢车间弹性优化调度方法及系统",
+      "type": "发明专利",
+      "date": "已公开",
+      "status": "公开",
+      "code": "",
+      "summary": "将数字孪生与调度优化结合，服务于炼钢车间弹性调度。"
+    },
+    {
+      "title": "炼铸轧一体化调度可视化平台 V1.0",
+      "type": "软件著作权",
+      "date": "2023",
+      "status": "已登记",
+      "code": "2023SR0358607",
+      "summary": "面向炼铸轧一体化生产调度的可视化平台。"
+    }
+  ],
+  "ip": [
+    {
+      "title": "一种炼钢连铸过程的多目标柔性调度方法",
+      "type": "发明专利",
+      "date": "2019.03.19",
+      "status": "已授权",
+      "code": "ZL201810030207.1",
+      "summary": "围绕炼钢—连铸过程中的多目标柔性调度问题，形成方法与专利成果。"
+    },
+    {
+      "title": "一种基于图模型的不确定炼钢-连铸柔性优化调度方法及系统",
+      "type": "发明专利",
+      "date": "2019.03.29",
+      "status": "已授权",
+      "code": "ZL201810143131.3",
+      "summary": "基于图模型构建不确定条件下的炼钢—连铸柔性优化调度方法及系统。"
+    },
+    {
+      "title": "一种基于动态多目标差分进化算法的炼钢-连铸弹性调度优化方法及系统",
+      "type": "发明专利",
+      "date": "2023.05.02",
+      "status": "已授权",
+      "code": "ZL202111454602.0",
+      "summary": "利用动态多目标差分进化算法提升炼钢—连铸弹性调度优化能力。"
+    },
+    {
+      "title": "一种面向钢铁企业氧气系统的不确定优化调度方法及系统",
+      "type": "发明专利",
+      "date": "2023.05.23",
+      "status": "已授权",
+      "code": "ZL202111454483.9",
+      "summary": "面向钢铁企业氧气系统的不确定优化调度方法，支撑工业能流协同决策。"
+    },
+    {
+      "title": "考虑订单动态到达的多目标热轧生产调度方法及系统",
+      "type": "发明专利",
+      "date": "2024.11.15",
+      "status": "已授权",
+      "code": "ZL202410149329.8",
+      "summary": "针对订单动态到达场景提出多目标热轧生产调度方法及系统。"
+    },
+    {
+      "title": "基于蚁群优化的热轧生产线集成计划与调度方法及系统",
+      "type": "发明专利",
+      "date": "2025.01.28",
+      "status": "已授权",
+      "code": "ZL202410200753.0",
+      "summary": "面向热轧生产线集成计划与调度的一体化优化方法及系统。"
+    },
+    {
+      "title": "转底炉动态配料优化方法及系统",
+      "type": "发明专利",
+      "date": "2023.10.09",
+      "status": "已公开",
+      "code": "202311293482.X",
+      "summary": "围绕转底炉动态配料过程提出优化方法及系统。"
+    },
+    {
+      "title": "融合 XGBoost 和 PSO 的转底炉操作参数优化方法及系统",
+      "type": "发明专利",
+      "date": "2024.10.18",
+      "status": "已公开",
+      "code": "202411459428.2",
+      "summary": "融合数据驱动建模与优化算法的转底炉参数优化方法。"
+    },
+    {
+      "title": "基于数字孪生的炼钢车间弹性优化调度方法及系统",
+      "type": "发明专利",
+      "date": "已公开",
+      "status": "公开",
+      "code": "",
+      "summary": "将数字孪生与调度优化结合，服务于炼钢车间弹性调度。"
+    },
+    {
+      "title": "炼钢-连铸人机协同智能生产调度软件 V1.0",
+      "type": "软件著作权",
+      "date": "2021",
+      "status": "已登记",
+      "code": "2021SR1166244",
+      "summary": "面向炼钢—连铸场景的人机协同智能生产调度软件。"
+    },
+    {
+      "title": "炼铸轧一体化调度可视化平台 V1.0",
+      "type": "软件著作权",
+      "date": "2023",
+      "status": "已登记",
+      "code": "2023SR0358607",
+      "summary": "面向炼铸轧一体化生产调度的可视化平台。"
+    }
+  ],
+  "journal_papers_structured": [
+    {
+      "index": "1",
+      "authors": "Luo Q, Jiang S L*, Chiong R, Lv X",
+      "title": "A Data-Driven Multi-objective Differential Evolution Framework for Charging-Thermal Coupled Parameter Optimization in Rotary Hearth Furnace Operations",
+      "ptype": "journal",
+      "tail": "Swarm and Evolutionary Computation, 2026.",
+      "citation": "[1] Luo Q, Jiang S L*, Chiong R, Lv X. A Data-Driven Multi-objective Differential Evolution Framework for Charging-Thermal Coupled Parameter Optimization in Rotary Hearth Furnace Operations [J]. Swarm and Evolutionary Computation, 2026.",
+      "year": "2026",
+      "published": false,
+      "link": ""
+    },
+    {
+      "index": "2",
+      "authors": "He L, Jiang S L*, Sun L, Chiong R",
+      "title": "A learning-guided MOEA for energy-oriented hybrid flow shop scheduling with limited buffers",
+      "ptype": "journal",
+      "tail": "Information Sciences, 2025: 122884.",
+      "citation": "[2] He L, Jiang S L*, Sun L, Chiong R. A learning-guided MOEA for energy-oriented hybrid flow shop scheduling with limited buffers [J]. Information Sciences, 2025: 122884.",
+      "year": "2025",
+      "published": true,
+      "link": "https://doi.org/10.1016/j.ins.2025.122884"
+    },
+    {
+      "index": "3",
+      "authors": "Liu Q, Zhu L, Hou R, Jiang S L*, Chai Y, Liu M",
+      "title": "Stochastic Sparse Bayesian Identification for Nonlinear Systems from Large Dataset",
+      "ptype": "journal",
+      "tail": "IEEE Transactions on Instrumentation and Measurement, 2025: 6508211.",
+      "citation": "[3] Liu Q, Zhu L, Hou R, Jiang S L*, Chai Y, Liu M. Stochastic Sparse Bayesian Identification for Nonlinear Systems from Large Dataset [J]. IEEE Transactions on Instrumentation and Measurement, 2025: 6508211.",
+      "year": "2025",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=Stochastic%20Sparse%20Bayesian%20Identification%20for%20Nonlinear%20Systems%20from%20Large%20Dataset"
+    },
+    {
+      "index": "4",
+      "authors": "Jiang S L, Cao L, Liu Q*, et al",
+      "title": "An online learning-based mACO approach for hot rolling scheduling problems involving dynamic order arrivals",
+      "ptype": "journal",
+      "tail": "IEEE Transactions on Automation Science and Engineering, 2025, 22: 12322-12335.",
+      "citation": "[4] Jiang S L, Cao L, Liu Q*, et al. An online learning-based mACO approach for hot rolling scheduling problems involving dynamic order arrivals [J]. IEEE Transactions on Automation Science and Engineering, 2025, 22: 12322-12335.",
+      "year": "2025",
+      "published": true,
+      "link": "https://doi.org/10.1109/TASE.2025.3540042"
+    },
+    {
+      "index": "5",
+      "authors": "Jiang S L*, He L, Cao L, et al",
+      "title": "A learning-enhanced ant colony optimization algorithm for integrated planning and scheduling in hot rolling production lines under uncertainty",
+      "ptype": "journal",
+      "tail": "Swarm and Evolutionary Computation, 2025, 93: 101851.",
+      "citation": "[5] Jiang S L*, He L, Cao L, et al. A learning-enhanced ant colony optimization algorithm for integrated planning and scheduling in hot rolling production lines under uncertainty [J]. Swarm and Evolutionary Computation, 2025, 93: 101851.",
+      "year": "2025",
+      "published": true,
+      "link": "https://doi.org/10.1016/j.swevo.2025.101851"
+    },
+    {
+      "index": "6",
+      "authors": "Jiang S L*",
+      "title": "A soft encoding-based evolutionary algorithm for the steelmaking scheduling problem and its extension under energy thresholds",
+      "ptype": "journal",
+      "tail": "Computers & Operations Research, 2024: 106885.",
+      "citation": "[6] Jiang S L*. A soft encoding-based evolutionary algorithm for the steelmaking scheduling problem and its extension under energy thresholds [J]. Computers & Operations Research, 2024: 106885.",
+      "year": "2024",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20soft%20encoding-based%20evolutionary%20algorithm%20for%20the%20steelmaking%20scheduling%20problem%20and%20its%20extension%20under%20energy%20thresholds"
+    },
+    {
+      "index": "7",
+      "authors": "Chen L, Cao L, Wen Y, Jiang S L*",
+      "title": "A knowledge-based NSGA-II algorithm for multi-objective hot rolling production scheduling under flexible time-of-use electricity pricing",
+      "ptype": "journal",
+      "tail": "Journal of Manufacturing Systems, 2023, 69: 255-270.",
+      "citation": "[7] Chen L, Cao L, Wen Y, Jiang S L*. A knowledge-based NSGA-II algorithm for multi-objective hot rolling production scheduling under flexible time-of-use electricity pricing [J]. Journal of Manufacturing Systems, 2023, 69: 255-270.",
+      "year": "2023",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20knowledge-based%20NSGA-II%20algorithm%20for%20multi-objective%20hot%20rolling%20production%20scheduling%20under%20flexible%20time-of-use%20electricity%20pricing"
+    },
+    {
+      "index": "8",
+      "authors": "Jiang S L*, Wang M, Bogle I D L",
+      "title": "Plant-wide byproduct gas distribution under uncertainty in iron and steel industry via quantile forecasting and robust optimization",
+      "ptype": "journal",
+      "tail": "Applied Energy, 2023, 350(15): 121603.",
+      "citation": "[8] Jiang S L*, Wang M, Bogle I D L. Plant-wide byproduct gas distribution under uncertainty in iron and steel industry via quantile forecasting and robust optimization [J]. Applied Energy, 2023, 350(15): 121603.",
+      "year": "2023",
+      "published": true,
+      "link": "https://doi.org/10.1016/j.apenergy.2023.121603"
+    },
+    {
+      "index": "9",
+      "authors": "Jiang S L*, Peng G, Bogle I D L, et al",
+      "title": "Two-stage robust optimization approach for flexible oxygen distribution under uncertainty in integrated iron and steel plants",
+      "ptype": "journal",
+      "tail": "Applied Energy, 2022, 306: 118022.",
+      "citation": "[9] Jiang S L*, Peng G, Bogle I D L, et al. Two-stage robust optimization approach for flexible oxygen distribution under uncertainty in integrated iron and steel plants [J]. Applied Energy, 2022, 306: 118022.",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=Two-stage%20robust%20optimization%20approach%20for%20flexible%20oxygen%20distribution%20under%20uncertainty%20in%20integrated%20iron%20and%20steel%20plants"
+    },
+    {
+      "index": "10",
+      "authors": "Jiang S L*, Li W, Zhang X, et al",
+      "title": "An improved Pareto local search for solving bi-objective scheduling problems in hot rolling mills",
+      "ptype": "journal",
+      "tail": "Computers & Industrial Engineering, 2022, 172: 108561.",
+      "citation": "[10] Jiang S L*, Li W, Zhang X, et al. An improved Pareto local search for solving bi-objective scheduling problems in hot rolling mills [J]. Computers & Industrial Engineering, 2022, 172: 108561.",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=An%20improved%20Pareto%20local%20search%20for%20solving%20bi-objective%20scheduling%20problems%20in%20hot%20rolling%20mills"
+    },
+    {
+      "index": "11",
+      "authors": "Jiang S L*, Xu C, Zhang L, et al",
+      "title": "A decomposition-based two-stage online scheduling approach and its integrated system in the hybrid flow shop of steel industry",
+      "ptype": "journal",
+      "tail": "Expert Systems with Applications, 2022: 119200.",
+      "citation": "[11] Jiang S L*, Xu C, Zhang L, et al. A decomposition-based two-stage online scheduling approach and its integrated system in the hybrid flow shop of steel industry [J]. Expert Systems with Applications, 2022: 119200.",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20decomposition-based%20two-stage%20online%20scheduling%20approach%20and%20its%20integrated%20system%20in%20the%20hybrid%20flow%20shop%20of%20steel%20industry"
+    },
+    {
+      "index": "12",
+      "authors": "Jiang S L*, Liu Q, Bogle I D L, et al",
+      "title": "A Self-Learning Based Dynamic Multi-Objective Evolutionary Algorithm for Resilient Scheduling Problems in Steelmaking Plants",
+      "ptype": "journal",
+      "tail": "IEEE Transactions on Automation Science and Engineering, 2022, 20(2): 832-845.",
+      "citation": "[12] Jiang S L*, Liu Q, Bogle I D L, et al. A Self-Learning Based Dynamic Multi-Objective Evolutionary Algorithm for Resilient Scheduling Problems in Steelmaking Plants [J]. IEEE Transactions on Automation Science and Engineering, 2022, 20(2): 832-845.",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20Self-Learning%20Based%20Dynamic%20Multi-Objective%20Evolutionary%20Algorithm%20for%20Resilient%20Scheduling%20Problems%20in%20Steelmaking%20Plants"
+    },
+    {
+      "index": "13",
+      "authors": "Jiang S L*, Zheng Z, Liu M",
+      "title": "A preference-inspired multi-objective soft scheduling algorithm for the practical steelmaking-continuous casting production",
+      "ptype": "journal",
+      "tail": "Computers & Industrial Engineering, 2018, 115: 582-594.",
+      "citation": "[13] Jiang S L*, Zheng Z, Liu M. A preference-inspired multi-objective soft scheduling algorithm for the practical steelmaking-continuous casting production [J]. Computers & Industrial Engineering, 2018, 115: 582-594.",
+      "year": "2018",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20preference-inspired%20multi-objective%20soft%20scheduling%20algorithm%20for%20the%20practical%20steelmaking-continuous%20casting%20production"
+    },
+    {
+      "index": "14",
+      "authors": "Jiang S L*, Zheng Z, Liu M",
+      "title": "A multi-stage dynamic soft scheduling algorithm for the uncertain steelmaking-continuous casting scheduling problem",
+      "ptype": "journal",
+      "tail": "Applied Soft Computing, 2017, 60: 722-736.",
+      "citation": "[14] Jiang S L*, Zheng Z, Liu M. A multi-stage dynamic soft scheduling algorithm for the uncertain steelmaking-continuous casting scheduling problem [J]. Applied Soft Computing, 2017, 60: 722-736.",
+      "year": "2017",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20multi-stage%20dynamic%20soft%20scheduling%20algorithm%20for%20the%20uncertain%20steelmaking-continuous%20casting%20scheduling%20problem"
+    },
+    {
+      "index": "15",
+      "authors": "Jiang S L*, Liu M, Lin J, et al",
+      "title": "A prediction-based online soft scheduling algorithm for the real-world steelmaking-continuous casting production",
+      "ptype": "journal",
+      "tail": "Knowledge-Based Systems, 2016, 111: 159-172.",
+      "citation": "[15] Jiang S L*, Liu M, Lin J, et al. A prediction-based online soft scheduling algorithm for the real-world steelmaking-continuous casting production [J]. Knowledge-Based Systems, 2016, 111: 159-172.",
+      "year": "2016",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20prediction-based%20online%20soft%20scheduling%20algorithm%20for%20the%20real-world%20steelmaking-continuous%20casting%20production"
+    },
+    {
+      "index": "16",
+      "authors": "Jiang S L*, Liu M, Hao J",
+      "title": "A two-phase soft optimization method for the uncertain scheduling problem in the steelmaking industry",
+      "ptype": "journal",
+      "tail": "IEEE Transactions on Systems, Man, and Cybernetics: Systems, 2016, 47(3): 416-431.",
+      "citation": "[16] Jiang S L*, Liu M, Hao J. A two-phase soft optimization method for the uncertain scheduling problem in the steelmaking industry [J]. IEEE Transactions on Systems, Man, and Cybernetics: Systems, 2016, 47(3): 416-431.",
+      "year": "2016",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20two-phase%20soft%20optimization%20method%20for%20the%20uncertain%20scheduling%20problem%20in%20the%20steelmaking%20industry"
+    },
+    {
+      "index": "17",
+      "authors": "Jiang S L*, Liu M, Hao J, et al",
+      "title": "A bi-layer optimization approach for a hybrid flow shop scheduling problem involving controllable processing times in the steelmaking industry",
+      "ptype": "journal",
+      "tail": "Computers & Industrial Engineering, 2015, 87: 518-531.",
+      "citation": "[17] Jiang S L*, Liu M, Hao J, et al. A bi-layer optimization approach for a hybrid flow shop scheduling problem involving controllable processing times in the steelmaking industry [J]. Computers & Industrial Engineering, 2015, 87: 518-531.",
+      "year": "2015",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20bi-layer%20optimization%20approach%20for%20a%20hybrid%20flow%20shop%20scheduling%20problem%20involving%20controllable%20processing%20times%20in%20the%20steelmaking%20industry"
+    },
+    {
+      "index": "18",
+      "authors": "孙棣华*，蒋胜龙*，高博麟，赵敏，林景栋，肖雅月，梁浩，李克强",
+      "title": "智能网联汽车信息物理系统研究进展",
+      "ptype": "journal",
+      "tail": "汽车工程，2026.",
+      "citation": "[18] 孙棣华*，蒋胜龙*，高博麟，赵敏，林景栋，肖雅月，梁浩，李克强. 智能网联汽车信息物理系统研究进展 [J]. 汽车工程，2026.",
+      "year": "2026",
+      "published": false,
+      "link": ""
+    },
+    {
+      "index": "19",
+      "authors": "苏章圣，蒋胜龙*，彭功状，梁越永",
+      "title": "基于分层强化学习的天车调度优化方法",
+      "ptype": "journal",
+      "tail": "控制理论与应用，2025, 42(11): 2261-2273.",
+      "citation": "[19] 苏章圣，蒋胜龙*，彭功状，梁越永. 基于分层强化学习的天车调度优化方法 [J]. 控制理论与应用，2025, 42(11): 2261-2273.",
+      "year": "2025",
+      "published": true,
+      "link": "https://doi.org/10.7641/CTA.2025.50167"
+    },
+    {
+      "index": "20",
+      "authors": "蒋胜龙*，文耀民，陈兰，等",
+      "title": "不确定条件下炼钢-连铸生产调度的两阶段鲁棒优化方法",
+      "ptype": "journal",
+      "tail": "控制与决策, 2023, 38(12): 3516-3524.",
+      "citation": "[20] 蒋胜龙*，文耀民，陈兰，等. 不确定条件下炼钢-连铸生产调度的两阶段鲁棒优化方法 [J]. 控制与决策, 2023, 38(12): 3516-3524.",
+      "year": "2023",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%9D%A1%E4%BB%B6%E4%B8%8B%E7%82%BC%E9%92%A2-%E8%BF%9E%E9%93%B8%E7%94%9F%E4%BA%A7%E8%B0%83%E5%BA%A6%E7%9A%84%E4%B8%A4%E9%98%B6%E6%AE%B5%E9%B2%81%E6%A3%92%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95"
+    },
+    {
+      "index": "21",
+      "authors": "蒋胜龙*，文耀民，唐伟，等",
+      "title": "一种考虑能源约束的炼钢-连铸调度优化方法",
+      "ptype": "journal",
+      "tail": "华中科技大学学报(自然科学版), 2022, 50(06): 118-123+132.",
+      "citation": "[21] 蒋胜龙*，文耀民，唐伟，等. 一种考虑能源约束的炼钢-连铸调度优化方法 [J]. 华中科技大学学报(自然科学版), 2022, 50(06): 118-123+132.",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=%E4%B8%80%E7%A7%8D%E8%80%83%E8%99%91%E8%83%BD%E6%BA%90%E7%BA%A6%E6%9D%9F%E7%9A%84%E7%82%BC%E9%92%A2-%E8%BF%9E%E9%93%B8%E8%B0%83%E5%BA%A6%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95"
+    },
+    {
+      "index": "22",
+      "authors": "蒋胜龙*，郑忠",
+      "title": "考虑不确定加工时间的炼钢-连铸过程柔性调度方法",
+      "ptype": "journal",
+      "tail": "计算机集成制造系统, 2019, 25(1): 103-114.",
+      "citation": "[22] 蒋胜龙*，郑忠. 考虑不确定加工时间的炼钢-连铸过程柔性调度方法 [J]. 计算机集成制造系统, 2019, 25(1): 103-114.",
+      "year": "2019",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=%E8%80%83%E8%99%91%E4%B8%8D%E7%A1%AE%E5%AE%9A%E5%8A%A0%E5%B7%A5%E6%97%B6%E9%97%B4%E7%9A%84%E7%82%BC%E9%92%A2-%E8%BF%9E%E9%93%B8%E8%BF%87%E7%A8%8B%E6%9F%94%E6%80%A7%E8%B0%83%E5%BA%A6%E6%96%B9%E6%B3%95"
+    },
+    {
+      "index": "23",
+      "authors": "蒋胜龙，郑忠*，高小强，等",
+      "title": "基于 UML 的炼钢物流仿真系统分析与设计",
+      "ptype": "journal",
+      "tail": "系统仿真学报, 2007, 19(16): 3676-3679.",
+      "citation": "[23] 蒋胜龙，郑忠*，高小强，等. 基于 UML 的炼钢物流仿真系统分析与设计 [J]. 系统仿真学报, 2007, 19(16): 3676-3679.",
+      "year": "2007",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=%E5%9F%BA%E4%BA%8E%20UML%20%E7%9A%84%E7%82%BC%E9%92%A2%E7%89%A9%E6%B5%81%E4%BB%BF%E7%9C%9F%E7%B3%BB%E7%BB%9F%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BE%E8%AE%A1"
+    }
+  ],
+  "conference_papers_structured": [
+    {
+      "index": "1",
+      "authors": "Sun L, Su Z, Jiang S L*",
+      "title": "A Learning-based Multi-Objective BRKGA for Steelmaking-Continuous Casting Scheduling with Transportation Thresholds",
+      "ptype": "conference",
+      "tail": "The 43rd Chinese Control Conference (CCC), IEEE, 2025.",
+      "citation": "[1] Sun L, Su Z, Jiang S L*. A Learning-based Multi-Objective BRKGA for Steelmaking-Continuous Casting Scheduling with Transportation Thresholds. The 43rd Chinese Control Conference (CCC), IEEE, 2025.",
+      "year": "2025",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20Learning-based%20Multi-Objective%20BRKGA%20for%20Steelmaking-Continuous%20Casting%20Scheduling%20with%20Transportation%20Thresholds"
+    },
+    {
+      "index": "2",
+      "authors": "Luo Q, Jiang S L*, You Z, et al",
+      "title": "An XGBoost-Based Model for Temperature Prediction in Rotary Hearth Furnaces: Incorporating Mechanistic and Temporal Factors",
+      "ptype": "conference",
+      "tail": "The 10th International Congress on the Science and Technology of Steelmaking (ICS2025).",
+      "citation": "[2] Luo Q, Jiang S L*, You Z, et al. An XGBoost-Based Model for Temperature Prediction in Rotary Hearth Furnaces: Incorporating Mechanistic and Temporal Factors. The 10th International Congress on the Science and Technology of Steelmaking (ICS2025).",
+      "year": "2025",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=An%20XGBoost-Based%20Model%20for%20Temperature%20Prediction%20in%20Rotary%20Hearth%20Furnaces%3A%20Incorporating%20Mechanistic%20and%20Temporal%20Factors"
+    },
+    {
+      "index": "3",
+      "authors": "Tang W, Cao L, Wen Y, Jiang S L*",
+      "title": "A bi-level optimization method for integrated production scheduling between continuous casting and hot rolling processes",
+      "ptype": "conference",
+      "tail": "2022 18th International Conference on Automation Science and Engineering (CASE), IEEE, 2022. (Oral)",
+      "citation": "[3] Tang W, Cao L, Wen Y, Jiang S L*. A bi-level optimization method for integrated production scheduling between continuous casting and hot rolling processes. 2022 18th International Conference on Automation Science and Engineering (CASE), IEEE, 2022. (Oral)",
+      "year": "2022",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20bi-level%20optimization%20method%20for%20integrated%20production%20scheduling%20between%20continuous%20casting%20and%20hot%20rolling%20processes"
+    },
+    {
+      "index": "4",
+      "authors": "Jiang S L*, Tang W, Hu W",
+      "title": "A CMA-ES algorithm for solving the steelmaking scheduling problem involving time buffers",
+      "ptype": "conference",
+      "tail": "2020 IEEE Congress on Evolutionary Computation (CEC), IEEE, 2020.",
+      "citation": "[4] Jiang S L*, Tang W, Hu W. A CMA-ES algorithm for solving the steelmaking scheduling problem involving time buffers. 2020 IEEE Congress on Evolutionary Computation (CEC), IEEE, 2020.",
+      "year": "2020",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20CMA-ES%20algorithm%20for%20solving%20the%20steelmaking%20scheduling%20problem%20involving%20time%20buffers"
+    },
+    {
+      "index": "5",
+      "authors": "Jiang S L*, Liu Q",
+      "title": "An adaptive sampling-estimation of distribution algorithm for robust scheduling in the steelmaking-continuous casting process",
+      "ptype": "conference",
+      "tail": "2017 13th International Conference on Automation Science and Engineering (CASE), IEEE, 2017.",
+      "citation": "[5] Jiang S L*, Liu Q. An adaptive sampling-estimation of distribution algorithm for robust scheduling in the steelmaking-continuous casting process. 2017 13th International Conference on Automation Science and Engineering (CASE), IEEE, 2017.",
+      "year": "2017",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=An%20adaptive%20sampling-estimation%20of%20distribution%20algorithm%20for%20robust%20scheduling%20in%20the%20steelmaking-continuous%20casting%20process"
+    },
+    {
+      "index": "6",
+      "authors": "Jiang S L, Liu M*, Hao J",
+      "title": "A modified RBM-based estimation of distribution algorithm for steelmaking-continuous casting scheduling",
+      "ptype": "conference",
+      "tail": "Proceedings of the 11th World Congress on Intelligent Control and Automation (WCICA), IEEE, 2014.",
+      "citation": "[6] Jiang S L, Liu M*, Hao J. A modified RBM-based estimation of distribution algorithm for steelmaking-continuous casting scheduling. Proceedings of the 11th World Congress on Intelligent Control and Automation (WCICA), IEEE, 2014.",
+      "year": "2014",
+      "published": true,
+      "link": "https://xueshu.baidu.com/s?wd=A%20modified%20RBM-based%20estimation%20of%20distribution%20algorithm%20for%20steelmaking-continuous%20casting%20scheduling"
+    }
+  ]
+}

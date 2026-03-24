@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" fill="none">
+      <defs>
+        <linearGradient id="bg" x1="200" y1="160" x2="1320" y2="860" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#1D4ED8"/>
+          <stop offset="1" stop-color="#14B8A6"/>
+        </linearGradient>
+        <filter id="shadow" x="100" y="80" width="1400" height="840" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="30" stdDeviation="34" flood-color="#0F172A" flood-opacity="0.18"/>
+        </filter>
+      </defs>
+      <rect width="1600" height="1000" rx="40" fill="#EFF6FF"/>
+      <rect x="68" y="68" width="1464" height="864" rx="44" fill="url(#bg)"/>
+      <g filter="url(#shadow)">
+        <rect x="144" y="122" width="1312" height="756" rx="40" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+      </g>
+      <circle cx="238" cy="214" r="120" fill="rgba(255,255,255,.12)"/>
+      <circle cx="1346" cy="770" r="168" fill="rgba(255,255,255,.08)"/>
+      
+        <circle cx="332" cy="290" r="22" fill="rgba(255,255,255,.30)"/>
+        <circle cx="690" cy="332" r="18" fill="rgba(255,255,255,.26)"/>
+        <circle cx="604" cy="222" r="14" fill="rgba(255,255,255,.24)"/>
+        <path d="M264 492L416 352C430 339 452 339 466 352L512 394L560 352C575 338 598 340 612 356L760 522V636C760 660 740 680 716 680H308C284 680 264 660 264 636V492Z" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.30)" stroke-width="10" />
+        <circle cx="404" cy="508" r="46" fill="rgba(255,255,255,.18)"/>
+        <circle cx="620" cy="552" r="58" fill="rgba(255,255,255,.20)"/>
+        <path d="M332 228L364 196" stroke="rgba(255,255,255,.24)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M668 216L690 184" stroke="rgba(255,255,255,.24)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M742 286L780 268" stroke="rgba(255,255,255,.24)" stroke-width="10" stroke-linecap="round"/>
+        
+    </svg>
