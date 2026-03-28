@@ -352,11 +352,13 @@ box-shadow:0 16px 28px rgba(35,61,92,.10)}
 .mentor-merged-copy h2{margin:12px 0 0;font-size:30px;line-height:1.18}
 .mentor-name-hero{margin:12px 0 0;font-size:34px;font-weight:800;line-height:1;color:#18324d;letter-spacing:.02em}
 .mentor-merged-copy p{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.86}
+.mentor-link-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.mentor-link-tags .topic-pill{text-decoration:none}
 .mentor-merged-copy .topic-grid{margin-top:16px;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
 .mentor-merged-copy .topic-pill{padding:8px 10px;border-radius:14px;min-height:40px;font-size:13px;font-weight:700}
 .mentor-merged-side{display:flex;align-items:center;justify-content:center;align-self:center}
 .mentor-portrait-shell{display:flex;align-items:center;justify-content:center;padding:0;border-radius:0;background:transparent;border:0}
-.mentor-portrait-shell img{width:min(255px,100%);border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 22px rgba(24,50,77,.10)}
+.mentor-portrait-shell img{width:min(290px,100%);border-radius:18px;border:1px solid var(--line);box-shadow:0 10px 22px rgba(24,50,77,.10)}
 
 .section-team-vibes{padding-top:4px;padding-bottom:8px}
 .team-vibes-grid{display:grid;grid-template-columns:1.18fr .82fr;gap:18px;align-items:stretch}
@@ -379,15 +381,30 @@ box-shadow:0 16px 28px rgba(35,61,92,.10)}
 .name-list li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid var(--line)}
 .name-list span{font-weight:700}
 .name-list em{font-style:normal;color:var(--muted);font-size:13px}
+.name-list span em{margin-left:8px;font-weight:400}
 .destination-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .destination-badges span{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:#eef5ff;color:var(--primary);font-size:13px;font-weight:700}
+.inline-destination{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.inline-destination h3{margin:0;font-size:20px;color:var(--text)}
+.inline-destination p{margin:8px 0 0;color:var(--muted);line-height:1.76}
 
 .research-direction-grid .direction-card{padding:24px 24px 22px}
 .research-direction-grid .direction-icon{font-size:18px;font-weight:800;width:52px;height:52px;background:linear-gradient(135deg,rgba(31,95,174,.12),rgba(45,120,196,.18));border:1px solid rgba(31,95,174,.12)}
 .research-direction-grid .direction-card h3{font-size:24px}
 .research-direction-grid .direction-card p{line-height:1.82}
+.page-research .research-direction-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.page-research .focus-grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
 
 .news-paper-tag{min-width:76px;text-align:center}
+
+@media (max-width:1024px){
+  .page-research .focus-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media (max-width:860px){
+  .page-research .research-direction-grid,
+  .page-research .focus-grid{grid-template-columns:1fr}
+}
 
 @media (max-width:980px){
   .intro-shell,.mentor-merged-card,.team-vibes-grid{grid-template-columns:1fr}
@@ -421,34 +438,7 @@ box-shadow:0 16px 28px rgba(35,61,92,.10)}
   .mentor-merged-copy p{font-size:15px;line-height:1.82}
   .mentor-merged-copy .topic-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .mentor-merged-copy .topic-pill{padding:8px 8px;min-height:38px;font-size:12px}
-  .mentor-portrait-shell img{width:min(215px,100%)}
+  .mentor-portrait-shell img{width:min(245px,100%)}
   .team-side-card h3{font-size:22px}
   .name-list li{align-items:flex-start;flex-direction:column}
-}
-
-.mentor-links-block {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.mentor-links-block a {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f3c88;
-  background: #f4f7fb;
-  transition: all 0.2s ease;
-}
-
-.mentor-links-block a:hover {
-  background: #e8f0ff;
-  transform: translateY(-1px);
 }

@@ -1,8 +1,8 @@
 {
   "team": {
-    "name_cn": "aio4cps课题组",
-    "name_en": "AIO4CPS Research Group",
-    "short_name": "AIO4CPS Lab",
+    "name_cn": "CPS人工智能与优化课题组",
+    "name_en": "AI and Optimization for Cyber-Physical Systems Research Group",
+    "short_name": "AIO4CPS",
     "affiliation": "重庆大学自动化学院",
     "email": "jiang_shl@cqu.edu.cn"
   },
