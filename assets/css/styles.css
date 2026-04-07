@@ -299,6 +299,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 
 .page-cooperation .page-hero.section-tight{padding-bottom:14px}
 .page-hero-contact{gap:18px}
+.page-cooperation .page-hero-contact{grid-template-columns:1fr auto;align-items:center}
 .contact-hero-card{padding:22px 24px}
 .contact-hero-card p{margin-top:9px;line-height:1.7}
 .page-cooperation .section{padding-top:24px;padding-bottom:30px}
