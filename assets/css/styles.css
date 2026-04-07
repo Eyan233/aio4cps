@@ -52,6 +52,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .hero-panel::after{content:"";position:absolute;right:-70px;top:-70px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle, rgba(31,95,174,.12), transparent 66%)}
 .hero-panel h1{margin:18px 0 0;font-size:48px;line-height:1.04;letter-spacing:-.8px}
 .hero-lead{margin:16px 0 0;color:var(--muted);font-size:17px;line-height:1.88;max-width:60ch}
+.hero-emphasis{color:var(--primary);font-weight:800;text-decoration:none}
 .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
 .stat-card{padding:18px;border-radius:18px;background:linear-gradient(180deg,#fff,#f6f9fd);border:1px solid var(--line);display:grid;gap:4px;transition:.22s ease;min-height:102px}
 .stat-card:hover{transform:translateY(-2px);border-color:rgba(31,95,174,.24);box-shadow:var(--shadow-soft)}
@@ -166,6 +167,13 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .coop-grid-modern{align-items:stretch}
 .spaced-list{margin-top:16px}
 .spaced-list li{padding-left:20px}
+.admission-lead,.coop-lead{padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,#f7fbff,#eef5ff);border:1px solid rgba(219,229,240,.95)}
+.support-list{display:grid;gap:12px;margin-top:16px}
+.support-item{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:14px 0;border-top:1px dashed var(--line)}
+.support-item:first-child{border-top:none}
+.support-index{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;border-radius:10px;background:rgba(31,95,174,.10);color:var(--primary);font-size:13px;font-weight:800}
+.support-item h3{margin:0;color:var(--primary);font-size:17px;line-height:1.35}
+.coop-panel-modern .support-item p{margin:6px 0 0;color:var(--muted);line-height:1.78}
 .inline-contact{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);color:var(--muted);font-weight:700}
 .inline-contact a{color:var(--primary)}
 .partner-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
