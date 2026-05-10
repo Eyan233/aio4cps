@@ -752,7 +752,15 @@
         updateSelectedCount();
         return;
       }
-      cachedReports = getVisibleReports(await getReports());
+      try{
+        cachedReports = getVisibleReports(await getReports());
+      }catch(error){
+        cachedReports = [];
+        reportList.innerHTML = `<div class="report-empty">周报列表加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
+        if(reportCount) reportCount.textContent = "0";
+        updateSelectedCount();
+        return;
+      }
       if(!cachedReports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
         if(reportCount) reportCount.textContent = "0";
