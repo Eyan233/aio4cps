@@ -268,6 +268,7 @@
     const userPanel = $("[data-user-panel]", root);
     const adminPanel = $("[data-admin-panel]", root);
     const uploadForm = $("[data-upload-form]", root);
+    const profileForm = $("[data-profile-form]", root);
     const reportList = $("[data-report-list]", root);
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
@@ -336,6 +337,7 @@
     });
     const getReport = (id)=>dbAction("readonly", store=>store.get(id));
     const getReports = ()=>dbAction("readonly", store=>store.getAll());
+    const deleteReport = (id)=>dbAction("readwrite", store=>store.delete(id));
 
     const formatSize = (bytes)=>{
       if(bytes < 1024) return `${bytes} B`;
@@ -350,6 +352,34 @@
       '"':"&quot;",
       "'":"&#39;"
     }[char]));
+
+    const profileKey = (username)=>`aio4cps-profile-${username}`;
+
+    const getProfile = (username)=>{
+      try{
+        return JSON.parse(localStorage.getItem(profileKey(username)) || "{}");
+      }catch(error){
+        return {};
+      }
+    };
+
+    const saveProfile = (username, profile)=>{
+      localStorage.setItem(profileKey(username), JSON.stringify(profile));
+    };
+
+    const getDisplayName = (username)=>{
+      const profile = getProfile(username);
+      return profile.displayName || username;
+    };
+
+    const updateCurrentUserText = ()=>{
+      if(!currentUser) return;
+      $$("[data-current-user]", root).forEach(el=>{
+        const roleText = currentUser.role === "admin" ? "管理员" : "用户";
+        const nameText = currentUser.role === "admin" ? currentUser.username : `${getDisplayName(currentUser.username)} · ${currentUser.username}`;
+        el.textContent = `${nameText} · ${roleText}`;
+      });
+    };
 
     const isAllowedFile = (file)=>{
       if(!file) return false;
@@ -382,25 +412,29 @@
       if(gate) gate.hidden = true;
       if(userPanel) userPanel.hidden = role !== "user";
       if(adminPanel) adminPanel.hidden = role !== "admin";
-      $$("[data-current-user]", root).forEach(el=>{
-        el.textContent = `${account.username} · ${role === "admin" ? "管理员" : "用户"}`;
-      });
+      document.body.classList.add("affairs-authenticated");
+      updateCurrentUserText();
       const reportName = $("#reportName", root);
-      if(reportName && role === "user") reportName.value = account.username;
+      if(reportName && role === "user") reportName.value = getDisplayName(account.username);
+      const displayName = $("#displayName", root);
+      if(displayName && role === "user") displayName.value = getProfile(account.username).displayName || "";
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
       if(role === "admin") renderReports();
+      window.scrollTo({top:0, behavior:"smooth"});
     };
 
     const logout = ()=>{
       if(gate) gate.hidden = false;
       if(userPanel) userPanel.hidden = true;
       if(adminPanel) adminPanel.hidden = true;
+      document.body.classList.remove("affairs-authenticated");
       currentUser = null;
       if(activePreviewUrl){
         URL.revokeObjectURL(activePreviewUrl);
         activePreviewUrl = "";
       }
       if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
+      window.scrollTo({top:0, behavior:"smooth"});
     };
 
     const loginForm = $("[data-report-login]", root);
@@ -425,12 +459,27 @@
       button.addEventListener("click", logout);
     });
 
+    if(profileForm){
+      profileForm.addEventListener("submit", (event)=>{
+        event.preventDefault();
+        if(!currentUser || currentUser.role !== "user") return;
+        const msg = $("[data-profile-message]", profileForm);
+        const displayName = String(new FormData(profileForm).get("displayName") || "").trim();
+        saveProfile(currentUser.username, {displayName});
+        updateCurrentUserText();
+        const reportName = $("#reportName", root);
+        if(reportName) reportName.value = getDisplayName(currentUser.username);
+        setMessage(msg, displayName ? "姓名已保存。" : "姓名已清空，将使用学号显示。", "success");
+      });
+    }
+
     if(uploadForm){
       uploadForm.addEventListener("submit", async (event)=>{
         event.preventDefault();
         const msg = $("[data-upload-message]", uploadForm);
         const formData = new FormData(uploadForm);
-        const name = currentUser && currentUser.role === "user" ? currentUser.username : String(formData.get("name") || "").trim();
+        const username = currentUser && currentUser.role === "user" ? currentUser.username : String(formData.get("name") || "").trim();
+        const name = currentUser && currentUser.role === "user" ? getDisplayName(currentUser.username) : username;
         const week = String(formData.get("week") || "").trim();
         const file = formData.get("file");
         if(!name || !week || !(file instanceof File) || !file.name){
@@ -445,9 +494,9 @@
           const isPdf = file.name.toLowerCase().endsWith(".pdf");
           const fileData = await file.arrayBuffer();
           const result = await saveReport({
-            id: reportIdFor(name, week),
+            id: reportIdFor(username, week),
             name,
-            username: name,
+            username,
             week,
             fileName: file.name,
             fileType: file.type || "application/octet-stream",
@@ -460,7 +509,7 @@
           });
           uploadForm.reset();
           const reportName = $("#reportName", uploadForm);
-          if(reportName && currentUser) reportName.value = currentUser.username;
+          if(reportName && currentUser) reportName.value = getDisplayName(currentUser.username);
           const weekSelect = $("#reportWeek", uploadForm);
           if(weekSelect) weekSelect.selectedIndex = 0;
           setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
@@ -578,6 +627,26 @@
       window.setTimeout(()=>URL.revokeObjectURL(url), 1000);
     };
 
+    const clearPreview = ()=>{
+      if(activePreviewUrl){
+        URL.revokeObjectURL(activePreviewUrl);
+        activePreviewUrl = "";
+      }
+      if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
+    };
+
+    const deleteReports = async (ids)=>{
+      const realIds = ids.filter(Boolean);
+      if(!realIds.length){
+        if(selectedCount) selectedCount.textContent = "请先选择文件";
+        return;
+      }
+      if(!window.confirm(`确定删除 ${realIds.length} 份周报吗？删除后本浏览器中不可恢复。`)) return;
+      await Promise.all(realIds.map(deleteReport));
+      clearPreview();
+      await renderReports();
+    };
+
     const previewReport = async (id)=>{
       const report = await getReport(id);
       if(!report || !preview) return;
@@ -633,6 +702,7 @@
             <div class="report-item-actions">
               <button class="btn-secondary" data-preview-report="${report.id}" type="button">在线查看</button>
               <button class="btn-primary" data-download-report="${report.id}" type="button">下载</button>
+              <button class="btn-danger" data-delete-report="${report.id}" type="button">删除</button>
             </div>
           </div>`;
       }).join("");
@@ -643,9 +713,13 @@
       const previewButton = event.target.closest("[data-preview-report]");
       const downloadButton = event.target.closest("[data-download-report], [data-download-current]");
       const downloadSelectedButton = event.target.closest("[data-download-selected]");
+      const deleteButton = event.target.closest("[data-delete-report]");
+      const deleteSelectedButton = event.target.closest("[data-delete-selected]");
       if(previewButton) previewReport(previewButton.dataset.previewReport);
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
+      if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
+      if(deleteSelectedButton) deleteReports($$("[data-select-report]:checked", root).map(input=>input.value));
     });
 
     root.addEventListener("change", (event)=>{

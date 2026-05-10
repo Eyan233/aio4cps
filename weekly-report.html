@@ -47,7 +47,7 @@
 </div>
 </div>
 <main id="main-content">
-<section class="page-hero section-tight page-hero-minimal">
+<section class="page-hero section-tight page-hero-minimal affairs-public-hero">
 <div class="container">
 <div class="page-hero-simple reveal">
 <span class="section-chip">事务中心</span>
@@ -59,7 +59,7 @@
 <section class="section report-section" data-weekly-report="">
 <div class="container">
 <div class="affairs-login-layout reveal" data-report-gate="">
-<aside class="affairs-module-card card-soft">
+<aside class="affairs-module-card">
 <span class="section-chip">模块</span>
 <h2>周报提交</h2>
 <p>当前周编号为第 1 周：2026/5/4 - 2026/5/10。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。</p>
@@ -68,7 +68,7 @@
 <span>更多事务模块待接入</span>
 </div>
 </aside>
-<form class="affairs-login-card card-soft" data-report-login="">
+<form class="affairs-login-card" data-report-login="">
 <span class="section-chip">账号登录</span>
 <h2>进入课题组事务系统</h2>
 <label class="form-label" for="loginUsername">用户名</label>
@@ -81,21 +81,45 @@
 </div>
 
 <div class="report-workspace" data-user-panel="" hidden="">
-<div class="affairs-shell">
-<aside class="affairs-sidebar card-soft">
+<div class="affairs-appbar">
 <div>
 <span class="section-chip">用户工作台</span>
-<h2>课题组事务</h2>
+<h1>课题组事务</h1>
 <p data-current-user=""></p>
+</div>
+<button class="btn-secondary" data-report-logout="" type="button">退出登录</button>
+</div>
+<div class="affairs-shell">
+<aside class="affairs-sidebar">
+<div>
+<span class="section-chip">模块导航</span>
+<h2>事务模块</h2>
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-upload">周报提交</a>
+<a href="#profile-settings">个人信息</a>
 <span>更多模块待接入</span>
 </nav>
-<button class="btn-secondary" data-report-logout="" type="button">退出登录</button>
 </aside>
 <section class="affairs-main">
-<article class="report-panel card-soft reveal" id="weekly-upload">
+<article class="report-panel reveal" id="profile-settings">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">个人信息</span>
+<h2>设置姓名</h2>
+<p>使用学号登录后，可在这里填写真实姓名；管理员列表会同时显示姓名和学号。</p>
+</div>
+</div>
+<form class="profile-form" data-profile-form="">
+<label class="form-label" for="displayName">姓名</label>
+<div class="profile-row">
+<input class="form-input" id="displayName" name="displayName" placeholder="请输入姓名" type="text"/>
+<button class="btn-secondary" type="submit">保存</button>
+</div>
+<p class="form-message" data-profile-message=""></p>
+</form>
+</article>
+<article class="report-panel reveal" id="weekly-upload">
 <div class="report-panel-head">
 <div>
 <span class="section-chip">周报提交</span>
@@ -129,18 +153,24 @@
 </div>
 
 <div class="report-workspace" data-admin-panel="" hidden="">
-<div class="affairs-shell affairs-shell-admin">
-<aside class="affairs-sidebar card-soft">
+<div class="affairs-appbar">
 <div>
 <span class="section-chip">管理员工作台</span>
-<h2>课题组事务</h2>
+<h1>课题组事务管理</h1>
 <p data-current-user=""></p>
+</div>
+<button class="btn-secondary" data-report-logout="" type="button">退出登录</button>
+</div>
+<div class="affairs-shell affairs-shell-admin">
+<aside class="affairs-sidebar">
+<div>
+<span class="section-chip">模块导航</span>
+<h2>管理模块</h2>
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-admin">周报管理</a>
 <span>更多模块待接入</span>
 </nav>
-<button class="btn-secondary" data-report-logout="" type="button">退出登录</button>
 </aside>
 <section class="affairs-main" id="weekly-admin">
 <div class="report-dashboard">
@@ -148,8 +178,7 @@
 <article class="metric-card"><span>已提交</span><strong data-report-count="">0</strong></article>
 <article class="metric-card"><span>当前周次</span><strong class="metric-small">第1周</strong></article>
 </div>
-<div class="report-admin-grid">
-<article class="report-panel card-soft reveal">
+<article class="report-panel reveal">
 <div class="report-panel-head">
 <div>
 <span class="section-chip">周报管理</span>
@@ -157,6 +186,7 @@
 </div>
 <div class="report-toolbar">
 <button class="btn-secondary" data-download-selected="" type="button">打包下载</button>
+<button class="btn-danger" data-delete-selected="" type="button">删除所选</button>
 <span data-selected-count="">未选择文件</span>
 </div>
 </div>
@@ -164,18 +194,18 @@
 <div class="report-empty">暂无周报记录。</div>
 </div>
 </article>
-<article class="report-panel card-soft reveal">
+<article class="report-panel report-preview-panel reveal">
 <div class="report-panel-head">
 <div>
-<span class="section-chip">在线查看</span>
+<span class="section-chip">PDF 预览</span>
 <h2>文件预览</h2>
+<p>预览区可从右下角拖动调整高度，适合查看宽版 PDF。</p>
 </div>
 </div>
 <div class="report-preview" data-report-preview="">
 <div class="report-empty">请选择一份周报进行查看。</div>
 </div>
 </article>
-</div>
 </section>
 </div>
 </div>
