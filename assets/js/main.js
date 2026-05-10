@@ -273,10 +273,8 @@
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
     const selectedCount = $("[data-selected-count]", root);
-    const dbName = "aio4cps-weekly-reports";
-    const storeName = "reports";
+    const reportApiBase = window.AIO4CPS_REPORT_API || "";
     let currentUser = null;
-    let activePreviewUrl = "";
 
     const setMessage = (el, text, type)=>{
       if(!el) return;
@@ -285,59 +283,45 @@
       el.classList.toggle("is-success", type === "success");
     };
 
-    const openDb = ()=>new Promise((resolve, reject)=>{
-      const request = indexedDB.open(dbName, 1);
-      request.onupgradeneeded = ()=>{
-        const db = request.result;
-        if(!db.objectStoreNames.contains(storeName)){
-          const store = db.createObjectStore(storeName, {keyPath:"id"});
-          store.createIndex("uploadedAt", "uploadedAt");
-        }
-      };
-      request.onsuccess = ()=>resolve(request.result);
-      request.onerror = ()=>reject(request.error);
-    });
+    const apiUrl = (path)=>`${reportApiBase.replace(/\/$/, "")}${path}`;
 
-    const dbAction = async (mode, action)=>{
-      const db = await openDb();
-      return new Promise((resolve, reject)=>{
-        const tx = db.transaction(storeName, mode);
-        const store = tx.objectStore(storeName);
-        const request = action(store);
-        request.onsuccess = ()=>resolve(request.result);
-        request.onerror = ()=>reject(request.error);
-        tx.oncomplete = ()=>db.close();
-        tx.onerror = ()=>reject(tx.error);
-      });
+    const ensureReportApi = ()=>{
+      if(!reportApiBase){
+        throw new Error("未配置服务器存储接口。GitHub Pages 纯静态页面不能直接接收跨设备上传，请配置后端接口或 GitHub 仓库存储服务。");
+      }
     };
 
-    const saveReport = (report)=>new Promise(async (resolve, reject)=>{
-      const db = await openDb();
-      const tx = db.transaction(storeName, "readwrite");
-      const store = tx.objectStore(storeName);
-      let replaced = false;
-      const allRequest = store.getAll();
-      allRequest.onsuccess = ()=>{
-        const reports = allRequest.result || [];
-        reports.forEach(oldReport=>{
-          const sameOwner = (oldReport.username || oldReport.name) === report.username;
-          if(sameOwner && oldReport.week === report.week){
-            if(oldReport.id !== report.id) store.delete(oldReport.id);
-            replaced = true;
-          }
-        });
-        store.put(report);
-      };
-      allRequest.onerror = ()=>reject(allRequest.error);
-      tx.oncomplete = ()=>{
-        db.close();
-        resolve({replaced});
-      };
-      tx.onerror = ()=>reject(tx.error);
-    });
-    const getReport = (id)=>dbAction("readonly", store=>store.get(id));
-    const getReports = ()=>dbAction("readonly", store=>store.getAll());
-    const deleteReport = (id)=>dbAction("readwrite", store=>store.delete(id));
+    const requestJson = async (path, options={})=>{
+      ensureReportApi();
+      const response = await fetch(apiUrl(path), options);
+      if(!response.ok) throw new Error(`请求失败：${response.status}`);
+      if(response.status === 204) return {};
+      const text = await response.text();
+      return text ? JSON.parse(text) : {};
+    };
+
+    const saveReport = async (report)=>{
+      ensureReportApi();
+      const formData = new FormData();
+      Object.entries(report.meta).forEach(([key, value])=>formData.append(key, value));
+      formData.append("file", report.file);
+      const response = await fetch(apiUrl("/reports"), {method:"POST", body:formData});
+      if(!response.ok) throw new Error(`上传失败：${response.status}`);
+      return response.json();
+    };
+
+    const getReport = async (id)=>{
+      const reports = await getReports();
+      return reports.find(report=>String(report.id) === String(id));
+    };
+
+    const getReports = async ()=>{
+      if(!reportApiBase) return [];
+      const data = await requestJson("/reports");
+      return Array.isArray(data) ? data : (data.reports || []);
+    };
+
+    const deleteReport = async (id)=>requestJson(`/reports/${encodeURIComponent(id)}`, {method:"DELETE"});
 
     const formatSize = (bytes)=>{
       if(bytes < 1024) return `${bytes} B`;
@@ -429,11 +413,7 @@
       if(adminPanel) adminPanel.hidden = true;
       document.body.classList.remove("affairs-authenticated");
       currentUser = null;
-      if(activePreviewUrl){
-        URL.revokeObjectURL(activePreviewUrl);
-        activePreviewUrl = "";
-      }
-      if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
+      if(preview) preview.innerHTML = '<div class="report-empty">在线查看会在新标签页打开 PDF。</div>';
       window.scrollTo({top:0, behavior:"smooth"});
     };
 
@@ -491,21 +471,18 @@
           return;
         }
         try{
-          const isPdf = file.name.toLowerCase().endsWith(".pdf");
-          const fileData = await file.arrayBuffer();
           const result = await saveReport({
-            id: reportIdFor(username, week),
-            name,
-            username,
-            week,
-            fileName: file.name,
-            fileType: file.type || "application/octet-stream",
-            fileSize: file.size,
-            uploadedAt: new Date().toISOString(),
-            data: fileData,
-            pdfData: isPdf ? fileData : null,
-            pdfFileName: isPdf ? file.name : "",
-            conversionStatus: isPdf ? "ready" : "needs-server"
+            meta: {
+              id: reportIdFor(username, week),
+              name,
+              username,
+              week,
+              fileName: file.name,
+              fileType: file.type || "application/octet-stream",
+              fileSize: String(file.size),
+              uploadedAt: new Date().toISOString()
+            },
+            file
           });
           uploadForm.reset();
           const reportName = $("#reportName", uploadForm);
@@ -514,31 +491,19 @@
           if(weekSelect) weekSelect.selectedIndex = 0;
           setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
         }catch(error){
-          setMessage(msg, "保存失败，请检查浏览器存储空间后重试。", "error");
+          setMessage(msg, error.message || "保存失败，请检查服务器存储接口后重试。", "error");
         }
       });
     }
-
-    const buildBlobUrl = (report, usePdf=false)=>{
-      const data = usePdf && report.pdfData ? report.pdfData : report.data;
-      const type = usePdf && report.pdfData ? "application/pdf" : (report.fileType || "application/octet-stream");
-      const blob = new Blob([data], {type});
-      return URL.createObjectURL(blob);
-    };
 
     const safeFileName = (value)=>String(value).replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
 
     const downloadReport = async (id)=>{
       const report = await getReport(id);
       if(!report) return;
-      const url = buildBlobUrl(report);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = safeFileName(`${report.name}-${report.week}-${report.fileName}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      const url = report.downloadUrl || report.url || report.pdfUrl;
+      if(!url) return;
+      window.open(url, "_blank", "noopener");
     };
 
     const crcTable = (()=> {
@@ -612,11 +577,17 @@
         return;
       }
       const reports = (await Promise.all(ids.map(getReport))).filter(Boolean);
-      const files = reports.map(report=>({
-        name: safeFileName(`${report.username || report.name}-${report.week}-${report.fileName}`),
-        data: report.data
+      const files = await Promise.all(reports.map(async report=>{
+        const url = report.downloadUrl || report.url || report.pdfUrl;
+        if(!url) return null;
+        const response = await fetch(url);
+        if(!response.ok) return null;
+        return {
+          name: safeFileName(`${report.username || report.name}-${report.week}-${report.fileName}`),
+          data: await response.arrayBuffer()
+        };
       }));
-      const zip = createZip(files);
+      const zip = createZip(files.filter(Boolean));
       const url = URL.createObjectURL(zip);
       const link = document.createElement("a");
       link.href = url;
@@ -628,11 +599,7 @@
     };
 
     const clearPreview = ()=>{
-      if(activePreviewUrl){
-        URL.revokeObjectURL(activePreviewUrl);
-        activePreviewUrl = "";
-      }
-      if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
+      if(preview) preview.innerHTML = '<div class="report-empty">在线查看会在新标签页打开 PDF。</div>';
     };
 
     const deleteReports = async (ids)=>{
@@ -650,17 +617,17 @@
     const previewReport = async (id)=>{
       const report = await getReport(id);
       if(!report || !preview) return;
-      if(activePreviewUrl) URL.revokeObjectURL(activePreviewUrl);
-      activePreviewUrl = buildBlobUrl(report, Boolean(report.pdfData));
       const lowerName = report.fileName.toLowerCase();
-      if(lowerName.endsWith(".pdf") || report.pdfData){
-        preview.innerHTML = `<iframe title="${escapeHtml(report.fileName)}" src="${activePreviewUrl}"></iframe>`;
+      const previewUrl = report.pdfUrl || (lowerName.endsWith(".pdf") ? (report.url || report.downloadUrl) : "");
+      if(previewUrl){
+        window.open(previewUrl, "_blank", "noopener");
+        preview.innerHTML = `<div class="report-empty">已在新标签页打开：${escapeHtml(report.fileName)}</div>`;
       }else{
         preview.innerHTML = `
           <div class="report-preview-card">
             <strong>${escapeHtml(report.fileName)}</strong>
             <span>${escapeHtml(report.name)} · ${escapeHtml(report.week)} · ${formatSize(report.fileSize)}</span>
-            <span>该文件为 Word 格式。GitHub Pages 静态站点无法在浏览器内调用 LibreOffice 转 PDF；接入后端转换服务后可在此处直接预览转换后的 PDF。</span>
+            <span>该文件没有可预览 PDF 地址，请先在服务器端完成 Word 转 PDF 并返回 pdfUrl。</span>
             <button class="btn-primary" data-download-current="${report.id}" type="button">下载文件</button>
           </div>`;
       }
@@ -674,6 +641,12 @@
 
     const renderReports = async ()=>{
       if(!reportList) return;
+      if(!reportApiBase){
+        reportList.innerHTML = '<div class="report-empty">尚未配置服务器存储接口。GitHub Pages 静态页面不能直接保存跨设备上传文件。</div>';
+        if(reportCount) reportCount.textContent = "0";
+        updateSelectedCount();
+        return;
+      }
       const reports = getVisibleReports(await getReports());
       if(!reports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';

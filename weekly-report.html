@@ -143,7 +143,7 @@
 </select>
 <label class="form-label" for="reportFile">周报文件</label>
 <input accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="form-input report-file-input" id="reportFile" name="file" required="" type="file"/>
-<p class="report-tip">优先上传 PDF 版本，PDF 可直接在线查看；Word 文件会保存原件，静态站点需接入转换服务后才能自动转 PDF。</p>
+<p class="report-tip">优先上传 PDF 版本。文件将提交到服务器/仓库存储接口，未配置接口时不会保存在本浏览器。</p>
 <button class="btn-primary" type="submit">提交周报</button>
 <p class="form-message" data-upload-message=""></p>
 </form>
@@ -199,11 +199,11 @@
 <div>
 <span class="section-chip">PDF 预览</span>
 <h2>文件预览</h2>
-<p>预览区可从右下角拖动调整高度，适合查看宽版 PDF。</p>
+<p>点击“在线查看”将在新标签页打开 PDF，使用浏览器自带预览。</p>
 </div>
 </div>
 <div class="report-preview" data-report-preview="">
-<div class="report-empty">请选择一份周报进行查看。</div>
+<div class="report-empty">在线查看会在新标签页打开 PDF。</div>
 </div>
 </article>
 </section>
