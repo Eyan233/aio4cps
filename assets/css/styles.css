@@ -178,8 +178,39 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .inline-contact a{color:var(--primary)}
 .partner-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
 .partner-badges span{padding:10px 14px;border-radius:999px;background:linear-gradient(180deg,#f7fbff,#eef5ff);border:1px solid var(--line);font-weight:700;color:var(--primary)}
+
+/* weekly report */
+.report-section{padding-top:24px}
+.report-access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+.report-access-card,.report-panel{padding:24px}
+.report-access-card h2,.report-panel h2{margin:12px 0 0;font-size:26px;line-height:1.24}
+.report-access-card .form-label{margin-top:18px}
+.report-code-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:8px}
+.form-label{display:block;font-weight:800;color:var(--text);margin:14px 0 8px}
+.form-input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--text);padding:11px 13px;font:inherit;outline:none;transition:border-color .2s ease, box-shadow .2s ease}
+.form-input:focus{border-color:rgba(31,95,174,.48);box-shadow:0 0 0 4px rgba(31,95,174,.10)}
+.form-message{min-height:22px;margin:10px 0 0;color:var(--muted);line-height:1.6}
+.form-message.is-error{color:#b42318}
+.form-message.is-success{color:var(--accent);font-weight:700}
+.report-workspace{margin-top:20px}
+.report-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.report-form{display:grid;gap:2px;max-width:620px}
+.report-file-input{padding:10px;background:#fff}
+.report-admin-grid{display:grid;grid-template-columns:minmax(320px,.88fr) minmax(0,1.12fr);gap:18px;align-items:start}
+.report-list{display:grid;gap:12px}
+.report-item{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff)}
+.report-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.report-item-title{font-weight:800;font-size:18px;line-height:1.35}
+.report-item-meta{display:grid;gap:4px;color:var(--muted);font-size:14px;line-height:1.55}
+.report-item-actions{display:flex;flex-wrap:wrap;gap:8px}
+.report-item-actions .btn-secondary,.report-item-actions .btn-primary{padding:9px 12px;border-radius:12px;font-size:14px}
+.report-empty{display:grid;place-items:center;min-height:180px;padding:26px;border:1px dashed var(--line-strong);border-radius:16px;color:var(--muted);background:#fff;text-align:center;line-height:1.7}
+.report-preview{min-height:420px}
+.report-preview iframe,.report-preview object{width:100%;min-height:560px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.report-preview-card{display:grid;gap:14px;padding:22px;border:1px dashed var(--line-strong);border-radius:16px;background:#fff;color:var(--muted);line-height:1.7}
+.report-preview-card strong{color:var(--text)}
 @media (max-width:1024px){
-  .intro-shell,.home-overview-grid,.mentor-card-modern,.cooperation-cta{grid-template-columns:1fr}
+  .intro-shell,.home-overview-grid,.mentor-card-modern,.cooperation-cta,.report-admin-grid{grid-template-columns:1fr}
   .mentor-card-photo{padding:0 28px 28px}
   .cooperation-cta-action{justify-content:flex-start}
 }
@@ -192,6 +223,9 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .page-hero-minimal .page-title{font-size:34px}
   .simple-heading h2,.module-card h2,.mentor-card-modern h2,.coop-panel-modern h2,.cooperation-cta h2,.section-head-compact h2{font-size:26px}
   .news-paper-item{grid-template-columns:1fr}
+  .report-access-grid,.report-code-row{grid-template-columns:1fr}
+  .report-panel-head,.report-item-head{display:grid}
+  .report-preview iframe,.report-preview object{min-height:420px}
 }
 
 

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>周报提交 | CPS人工智能与优化课题组</title>
+<meta content="CPS人工智能与优化课题组周报提交页面，支持成员上传 PDF、Word 周报，管理员通过验证码查看和下载。" name="description"/>
+<meta content="CPS人工智能与优化课题组, 周报, 文件上传, PDF, Word" name="keywords"/>
+<meta content="AI and Optimization for Cyber-Physical Systems Research Group, Chongqing University" name="author"/>
+<meta content="noindex,nofollow" name="robots"/>
+<meta content="#F4F7FB" name="theme-color"/>
+<link href="assets/img/logo.png" rel="icon"/>
+<link href="assets/css/styles.css" rel="stylesheet"/>
+<script defer="" src="assets/js/main.js"></script>
+<noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
+</head>
+<body class="page-weekly-report">
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+<div class="topbar">
+<div class="container">
+<div class="nav">
+<a aria-label="CPS人工智能与优化课题组首页" class="brand" href="index.html">
+<img alt="CPS人工智能与优化课题组标识" src="assets/img/logo.png"/>
+<span class="brand-text">
+<span class="t2">AI and Optimization for Cyber-Physical Systems</span>
+<span class="t1">CPS人工智能与优化课题组</span>
+</span>
+</a>
+<div aria-label="Primary" class="navlinks">
+<a data-page="index.html" href="index.html">首页</a>
+<a data-page="research.html" href="research.html">研究方向</a>
+<a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="news.html" href="news.html">课题组新闻</a>
+<a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
+<a data-page="weekly-report.html" href="weekly-report.html">周报提交</a>
+</div>
+<button aria-controls="mobileNav" aria-expanded="false" aria-label="打开导航菜单" class="hamburger" id="hamburger">菜单</button>
+</div>
+<div aria-label="移动端导航" class="mobile" hidden="" id="mobileNav">
+<a data-page="index.html" href="index.html">首页</a>
+<a data-page="research.html" href="research.html">研究方向</a>
+<a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="news.html" href="news.html">课题组新闻</a>
+<a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
+<a data-page="weekly-report.html" href="weekly-report.html">周报提交</a>
+</div>
+</div>
+</div>
+<main id="main-content">
+<section class="page-hero section-tight page-hero-minimal">
+<div class="container">
+<div class="page-hero-simple reveal">
+<span class="section-chip">周报管理</span>
+<h1 class="page-title">周报提交</h1>
+<p class="page-lead">成员输入验证码后上传本周周报；管理员输入验证码后可查看列表、在线预览 PDF，并下载 PDF 或 Word 文件。</p>
+</div>
+</div>
+</section>
+<section class="section report-section" data-weekly-report="">
+<div class="container">
+<div class="report-access-grid reveal" data-report-gate="">
+<form class="report-access-card card-soft" data-report-login="user">
+<span class="section-chip">用户入口</span>
+<h2>上传周报</h2>
+<label class="form-label" for="userCode">验证码</label>
+<div class="report-code-row">
+<input autocomplete="off" class="form-input" id="userCode" inputmode="numeric" maxlength="12" placeholder="请输入用户验证码" type="password"/>
+<button class="btn-primary" type="submit">进入</button>
+</div>
+<p class="form-message" data-report-message=""></p>
+</form>
+<form class="report-access-card card-soft" data-report-login="admin">
+<span class="section-chip">管理员入口</span>
+<h2>查看周报</h2>
+<label class="form-label" for="adminCode">验证码</label>
+<div class="report-code-row">
+<input autocomplete="off" class="form-input" id="adminCode" inputmode="numeric" maxlength="12" placeholder="请输入管理员验证码" type="password"/>
+<button class="btn-primary" type="submit">进入</button>
+</div>
+<p class="form-message" data-report-message=""></p>
+</form>
+</div>
+
+<div class="report-workspace" data-user-panel="" hidden="">
+<article class="report-panel card-soft reveal">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">用户工作台</span>
+<h2>上传本周周报</h2>
+</div>
+<button class="btn-secondary" data-report-logout="" type="button">退出</button>
+</div>
+<form class="report-form" data-upload-form="">
+<label class="form-label" for="reportName">姓名</label>
+<input class="form-input" id="reportName" name="name" placeholder="请输入姓名" required="" type="text"/>
+<label class="form-label" for="reportWeek">周次</label>
+<select class="form-input" id="reportWeek" name="week" required="">
+<option selected="" value="2026/5/4 - 2026/5/10">2026/5/4 - 2026/5/10</option>
+</select>
+<label class="form-label" for="reportFile">周报文件</label>
+<input accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="form-input report-file-input" id="reportFile" name="file" required="" type="file"/>
+<button class="btn-primary" type="submit">提交周报</button>
+<p class="form-message" data-upload-message=""></p>
+</form>
+</article>
+</div>
+
+<div class="report-workspace" data-admin-panel="" hidden="">
+<div class="report-admin-grid">
+<article class="report-panel card-soft reveal">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">管理员工作台</span>
+<h2>周报列表</h2>
+</div>
+<button class="btn-secondary" data-report-logout="" type="button">退出</button>
+</div>
+<div class="report-list" data-report-list="">
+<div class="report-empty">暂无周报记录。</div>
+</div>
+</article>
+<article class="report-panel card-soft reveal">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">在线查看</span>
+<h2>文件预览</h2>
+</div>
+</div>
+<div class="report-preview" data-report-preview="">
+<div class="report-empty">请选择一份周报进行查看。</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="footer">
+<div class="container footer-row">
+<div>© <span data-current-year=""></span> CPS人工智能与优化课题组 · 重庆大学自动化学院</div>
+<div><a href="mailto:jiang_shl@cqu.edu.cn">jiang_shl@cqu.edu.cn</a></div>
+</div>
+</div>
+</body>
+</html>

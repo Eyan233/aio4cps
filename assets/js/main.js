@@ -252,5 +252,227 @@
     start();
   };
 
+  const initWeeklyReport = (root)=>{
+    const userCode = "0000";
+    const adminCode = "1111";
+    const gate = $("[data-report-gate]", root);
+    const userPanel = $("[data-user-panel]", root);
+    const adminPanel = $("[data-admin-panel]", root);
+    const uploadForm = $("[data-upload-form]", root);
+    const reportList = $("[data-report-list]", root);
+    const preview = $("[data-report-preview]", root);
+    const dbName = "aio4cps-weekly-reports";
+    const storeName = "reports";
+    let activePreviewUrl = "";
+
+    const setMessage = (el, text, type)=>{
+      if(!el) return;
+      el.textContent = text || "";
+      el.classList.toggle("is-error", type === "error");
+      el.classList.toggle("is-success", type === "success");
+    };
+
+    const openDb = ()=>new Promise((resolve, reject)=>{
+      const request = indexedDB.open(dbName, 1);
+      request.onupgradeneeded = ()=>{
+        const db = request.result;
+        if(!db.objectStoreNames.contains(storeName)){
+          const store = db.createObjectStore(storeName, {keyPath:"id"});
+          store.createIndex("uploadedAt", "uploadedAt");
+        }
+      };
+      request.onsuccess = ()=>resolve(request.result);
+      request.onerror = ()=>reject(request.error);
+    });
+
+    const dbAction = async (mode, action)=>{
+      const db = await openDb();
+      return new Promise((resolve, reject)=>{
+        const tx = db.transaction(storeName, mode);
+        const store = tx.objectStore(storeName);
+        const request = action(store);
+        request.onsuccess = ()=>resolve(request.result);
+        request.onerror = ()=>reject(request.error);
+        tx.oncomplete = ()=>db.close();
+        tx.onerror = ()=>reject(tx.error);
+      });
+    };
+
+    const saveReport = (report)=>dbAction("readwrite", store=>store.put(report));
+    const getReport = (id)=>dbAction("readonly", store=>store.get(id));
+    const getReports = ()=>dbAction("readonly", store=>store.getAll());
+
+    const formatSize = (bytes)=>{
+      if(bytes < 1024) return `${bytes} B`;
+      if(bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    };
+
+    const escapeHtml = (value)=>String(value).replace(/[&<>"']/g, char=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[char]));
+
+    const isAllowedFile = (file)=>{
+      if(!file) return false;
+      const name = file.name.toLowerCase();
+      return name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx");
+    };
+
+    const showPanel = (role)=>{
+      if(gate) gate.hidden = true;
+      if(userPanel) userPanel.hidden = role !== "user";
+      if(adminPanel) adminPanel.hidden = role !== "admin";
+      $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
+      if(role === "admin") renderReports();
+    };
+
+    const logout = ()=>{
+      if(gate) gate.hidden = false;
+      if(userPanel) userPanel.hidden = true;
+      if(adminPanel) adminPanel.hidden = true;
+      if(activePreviewUrl){
+        URL.revokeObjectURL(activePreviewUrl);
+        activePreviewUrl = "";
+      }
+      if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
+    };
+
+    $$("[data-report-login]", root).forEach(form=>{
+      form.addEventListener("submit", (event)=>{
+        event.preventDefault();
+        const role = form.dataset.reportLogin;
+        const input = $("input", form);
+        const msg = $("[data-report-message]", form);
+        const pass = role === "admin" ? adminCode : userCode;
+        if(input && input.value.trim() === pass){
+          setMessage(msg, "验证通过。", "success");
+          showPanel(role);
+          input.value = "";
+        }else{
+          setMessage(msg, "验证码不正确，请重新输入。", "error");
+        }
+      });
+    });
+
+    $$("[data-report-logout]", root).forEach(button=>{
+      button.addEventListener("click", logout);
+    });
+
+    if(uploadForm){
+      uploadForm.addEventListener("submit", async (event)=>{
+        event.preventDefault();
+        const msg = $("[data-upload-message]", uploadForm);
+        const formData = new FormData(uploadForm);
+        const name = String(formData.get("name") || "").trim();
+        const week = String(formData.get("week") || "").trim();
+        const file = formData.get("file");
+        if(!name || !week || !(file instanceof File) || !file.name){
+          setMessage(msg, "请填写姓名、周次并选择文件。", "error");
+          return;
+        }
+        if(!isAllowedFile(file)){
+          setMessage(msg, "仅支持 PDF、DOC、DOCX 格式。", "error");
+          return;
+        }
+        try{
+          await saveReport({
+            id: (crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random()}`,
+            name,
+            week,
+            fileName: file.name,
+            fileType: file.type || "application/octet-stream",
+            fileSize: file.size,
+            uploadedAt: new Date().toISOString(),
+            data: await file.arrayBuffer()
+          });
+          uploadForm.reset();
+          const weekSelect = $("#reportWeek", uploadForm);
+          if(weekSelect) weekSelect.selectedIndex = 0;
+          setMessage(msg, "周报已提交。", "success");
+        }catch(error){
+          setMessage(msg, "保存失败，请检查浏览器存储空间后重试。", "error");
+        }
+      });
+    }
+
+    const buildBlobUrl = (report)=>{
+      const blob = new Blob([report.data], {type: report.fileType || "application/octet-stream"});
+      return URL.createObjectURL(blob);
+    };
+
+    const downloadReport = async (id)=>{
+      const report = await getReport(id);
+      if(!report) return;
+      const url = buildBlobUrl(report);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${report.name}-${report.week}-${report.fileName}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    };
+
+    const previewReport = async (id)=>{
+      const report = await getReport(id);
+      if(!report || !preview) return;
+      if(activePreviewUrl) URL.revokeObjectURL(activePreviewUrl);
+      activePreviewUrl = buildBlobUrl(report);
+      const lowerName = report.fileName.toLowerCase();
+      if(lowerName.endsWith(".pdf")){
+        preview.innerHTML = `<iframe title="${escapeHtml(report.fileName)}" src="${activePreviewUrl}"></iframe>`;
+      }else{
+        preview.innerHTML = `
+          <div class="report-preview-card">
+            <strong>${escapeHtml(report.fileName)}</strong>
+            <span>${escapeHtml(report.name)} · ${escapeHtml(report.week)} · ${formatSize(report.fileSize)}</span>
+            <span>Word 文件受浏览器能力限制，通常需要下载后使用 Word 或 WPS 查看。</span>
+            <button class="btn-primary" data-download-current="${report.id}" type="button">下载文件</button>
+          </div>`;
+      }
+    };
+
+    const renderReports = async ()=>{
+      if(!reportList) return;
+      const reports = (await getReports()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
+      if(!reports.length){
+        reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
+        return;
+      }
+      reportList.innerHTML = reports.map(report=>{
+        const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
+        return `
+          <div class="report-item" data-report-id="${report.id}">
+            <div class="report-item-head">
+              <div>
+                <div class="report-item-title">${escapeHtml(report.name)}</div>
+                <div class="report-item-meta">
+                  <span>${escapeHtml(report.week)}</span>
+                  <span>${escapeHtml(report.fileName)} · ${formatSize(report.fileSize)}</span>
+                  <span>${uploaded}</span>
+                </div>
+              </div>
+            </div>
+            <div class="report-item-actions">
+              <button class="btn-secondary" data-preview-report="${report.id}" type="button">在线查看</button>
+              <button class="btn-primary" data-download-report="${report.id}" type="button">下载</button>
+            </div>
+          </div>`;
+      }).join("");
+    };
+
+    root.addEventListener("click", (event)=>{
+      const previewButton = event.target.closest("[data-preview-report]");
+      const downloadButton = event.target.closest("[data-download-report], [data-download-current]");
+      if(previewButton) previewReport(previewButton.dataset.previewReport);
+      if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
+    });
+  };
+
+  $$("[data-weekly-report]").forEach(initWeeklyReport);
   $$("[data-carousel]").forEach(initCarousel);
 })();
