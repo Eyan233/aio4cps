@@ -62,7 +62,7 @@
 <aside class="affairs-module-card card-soft">
 <span class="section-chip">模块</span>
 <h2>周报提交</h2>
-<p>本周周期：2026/5/4 - 2026/5/10。成员登录后提交文件，管理员登录后集中查看、下载与预览。</p>
+<p>当前周编号为第 1 周：2026/5/4 - 2026/5/10。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。</p>
 <div class="affairs-module-list">
 <span class="active">周报提交</span>
 <span>更多事务模块待接入</span>
@@ -100,7 +100,7 @@
 <div>
 <span class="section-chip">周报提交</span>
 <h2>上传本周周报</h2>
-<p>建议优先上传 PDF 版本，便于管理员在线预览；也支持 Word 格式备份提交。</p>
+<p>建议优先上传 PDF 版本，便于管理员在线预览；同一账号同一周再次提交会覆盖原周报。</p>
 </div>
 </div>
 <form class="report-form" data-upload-form="">
@@ -108,11 +108,18 @@
 <input class="form-input" id="reportName" name="name" readonly="" required="" type="text"/>
 <label class="form-label" for="reportWeek">周次</label>
 <select class="form-input" id="reportWeek" name="week" required="">
-<option selected="" value="2026/5/4 - 2026/5/10">2026/5/4 - 2026/5/10</option>
+<option selected="" value="第1周：2026/5/4 - 2026/5/10">第1周：2026/5/4 - 2026/5/10</option>
+<option value="第2周：2026/5/11 - 2026/5/17">第2周：2026/5/11 - 2026/5/17</option>
+<option value="第3周：2026/5/18 - 2026/5/24">第3周：2026/5/18 - 2026/5/24</option>
+<option value="第4周：2026/5/25 - 2026/5/31">第4周：2026/5/25 - 2026/5/31</option>
+<option value="第5周：2026/6/1 - 2026/6/7">第5周：2026/6/1 - 2026/6/7</option>
+<option value="第6周：2026/6/8 - 2026/6/14">第6周：2026/6/8 - 2026/6/14</option>
+<option value="第7周：2026/6/15 - 2026/6/21">第7周：2026/6/15 - 2026/6/21</option>
+<option value="第8周：2026/6/22 - 2026/6/28">第8周：2026/6/22 - 2026/6/28</option>
 </select>
 <label class="form-label" for="reportFile">周报文件</label>
 <input accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="form-input report-file-input" id="reportFile" name="file" required="" type="file"/>
-<p class="report-tip">优先上传 PDF 版本，PDF 可直接在线查看；Word 文件可下载查看。</p>
+<p class="report-tip">优先上传 PDF 版本，PDF 可直接在线查看；Word 文件会保存原件，静态站点需接入转换服务后才能自动转 PDF。</p>
 <button class="btn-primary" type="submit">提交周报</button>
 <p class="form-message" data-upload-message=""></p>
 </form>
@@ -139,7 +146,7 @@
 <div class="report-dashboard">
 <article class="metric-card"><span>当前模块</span><strong>周报</strong></article>
 <article class="metric-card"><span>已提交</span><strong data-report-count="">0</strong></article>
-<article class="metric-card"><span>当前周次</span><strong class="metric-small">5/4-5/10</strong></article>
+<article class="metric-card"><span>当前周次</span><strong class="metric-small">第1周</strong></article>
 </div>
 <div class="report-admin-grid">
 <article class="report-panel card-soft reveal">
@@ -147,6 +154,10 @@
 <div>
 <span class="section-chip">周报管理</span>
 <h2>提交列表</h2>
+</div>
+<div class="report-toolbar">
+<button class="btn-secondary" data-download-selected="" type="button">打包下载</button>
+<span data-selected-count="">未选择文件</span>
 </div>
 </div>
 <div class="report-list" data-report-list="">

@@ -271,6 +271,7 @@
     const reportList = $("[data-report-list]", root);
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
+    const selectedCount = $("[data-selected-count]", root);
     const dbName = "aio4cps-weekly-reports";
     const storeName = "reports";
     let currentUser = null;
@@ -309,7 +310,30 @@
       });
     };
 
-    const saveReport = (report)=>dbAction("readwrite", store=>store.put(report));
+    const saveReport = (report)=>new Promise(async (resolve, reject)=>{
+      const db = await openDb();
+      const tx = db.transaction(storeName, "readwrite");
+      const store = tx.objectStore(storeName);
+      let replaced = false;
+      const allRequest = store.getAll();
+      allRequest.onsuccess = ()=>{
+        const reports = allRequest.result || [];
+        reports.forEach(oldReport=>{
+          const sameOwner = (oldReport.username || oldReport.name) === report.username;
+          if(sameOwner && oldReport.week === report.week){
+            if(oldReport.id !== report.id) store.delete(oldReport.id);
+            replaced = true;
+          }
+        });
+        store.put(report);
+      };
+      allRequest.onerror = ()=>reject(allRequest.error);
+      tx.oncomplete = ()=>{
+        db.close();
+        resolve({replaced});
+      };
+      tx.onerror = ()=>reject(tx.error);
+    });
     const getReport = (id)=>dbAction("readonly", store=>store.get(id));
     const getReports = ()=>dbAction("readonly", store=>store.getAll());
 
@@ -331,6 +355,25 @@
       if(!file) return false;
       const name = file.name.toLowerCase();
       return name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx");
+    };
+
+    const getWeekNumber = (week)=>{
+      const match = String(week).match(/第(\d+)周/);
+      return match ? match[1] : "0";
+    };
+
+    const reportIdFor = (username, week)=>`${username}-week-${getWeekNumber(week)}`;
+
+    const getVisibleReports = (reports)=>{
+      const latest = new Map();
+      reports.forEach(report=>{
+        const key = `${report.username || report.name}|${report.week}`;
+        const current = latest.get(key);
+        if(!current || String(report.uploadedAt).localeCompare(String(current.uploadedAt)) > 0){
+          latest.set(key, report);
+        }
+      });
+      return Array.from(latest.values()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
     };
 
     const showPanel = (account)=>{
@@ -399,8 +442,10 @@
           return;
         }
         try{
-          await saveReport({
-            id: (crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random()}`,
+          const isPdf = file.name.toLowerCase().endsWith(".pdf");
+          const fileData = await file.arrayBuffer();
+          const result = await saveReport({
+            id: reportIdFor(name, week),
             name,
             username: name,
             week,
@@ -408,24 +453,31 @@
             fileType: file.type || "application/octet-stream",
             fileSize: file.size,
             uploadedAt: new Date().toISOString(),
-            data: await file.arrayBuffer()
+            data: fileData,
+            pdfData: isPdf ? fileData : null,
+            pdfFileName: isPdf ? file.name : "",
+            conversionStatus: isPdf ? "ready" : "needs-server"
           });
           uploadForm.reset();
           const reportName = $("#reportName", uploadForm);
           if(reportName && currentUser) reportName.value = currentUser.username;
           const weekSelect = $("#reportWeek", uploadForm);
           if(weekSelect) weekSelect.selectedIndex = 0;
-          setMessage(msg, "周报已提交。", "success");
+          setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
         }catch(error){
           setMessage(msg, "保存失败，请检查浏览器存储空间后重试。", "error");
         }
       });
     }
 
-    const buildBlobUrl = (report)=>{
-      const blob = new Blob([report.data], {type: report.fileType || "application/octet-stream"});
+    const buildBlobUrl = (report, usePdf=false)=>{
+      const data = usePdf && report.pdfData ? report.pdfData : report.data;
+      const type = usePdf && report.pdfData ? "application/pdf" : (report.fileType || "application/octet-stream");
+      const blob = new Blob([data], {type});
       return URL.createObjectURL(blob);
     };
+
+    const safeFileName = (value)=>String(value).replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
 
     const downloadReport = async (id)=>{
       const report = await getReport(id);
@@ -433,7 +485,93 @@
       const url = buildBlobUrl(report);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${report.name}-${report.week}-${report.fileName}`;
+      link.download = safeFileName(`${report.name}-${report.week}-${report.fileName}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    };
+
+    const crcTable = (()=> {
+      const table = new Uint32Array(256);
+      for(let i = 0; i < 256; i++){
+        let c = i;
+        for(let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        table[i] = c >>> 0;
+      }
+      return table;
+    })();
+
+    const crc32 = (bytes)=>{
+      let crc = 0xffffffff;
+      for(let i = 0; i < bytes.length; i++) crc = crcTable[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+      return (crc ^ 0xffffffff) >>> 0;
+    };
+
+    const concatBytes = (parts)=>{
+      const total = parts.reduce((sum, part)=>sum + part.length, 0);
+      const out = new Uint8Array(total);
+      let offset = 0;
+      parts.forEach(part=>{
+        out.set(part, offset);
+        offset += part.length;
+      });
+      return out;
+    };
+
+    const u16 = (value)=>new Uint8Array([value & 255, (value >>> 8) & 255]);
+    const u32 = (value)=>new Uint8Array([value & 255, (value >>> 8) & 255, (value >>> 16) & 255, (value >>> 24) & 255]);
+
+    const createZip = (files)=>{
+      const encoder = new TextEncoder();
+      const locals = [];
+      const centrals = [];
+      let offset = 0;
+      const now = new Date();
+      const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+      const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+      files.forEach(file=>{
+        const nameBytes = encoder.encode(file.name);
+        const dataBytes = new Uint8Array(file.data);
+        const crc = crc32(dataBytes);
+        const local = concatBytes([
+          u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate),
+          u32(crc), u32(dataBytes.length), u32(dataBytes.length), u16(nameBytes.length), u16(0),
+          nameBytes, dataBytes
+        ]);
+        const central = concatBytes([
+          u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate),
+          u32(crc), u32(dataBytes.length), u32(dataBytes.length), u16(nameBytes.length), u16(0), u16(0),
+          u16(0), u16(0), u32(0), u32(offset), nameBytes
+        ]);
+        locals.push(local);
+        centrals.push(central);
+        offset += local.length;
+      });
+      const centralSize = centrals.reduce((sum, part)=>sum + part.length, 0);
+      const end = concatBytes([
+        u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+        u32(centralSize), u32(offset), u16(0)
+      ]);
+      return new Blob([...locals, ...centrals, end], {type:"application/zip"});
+    };
+
+    const downloadSelectedReports = async ()=>{
+      const ids = $$("[data-select-report]:checked", root).map(input=>input.value);
+      if(!ids.length){
+        if(selectedCount) selectedCount.textContent = "请先选择文件";
+        return;
+      }
+      const reports = (await Promise.all(ids.map(getReport))).filter(Boolean);
+      const files = reports.map(report=>({
+        name: safeFileName(`${report.username || report.name}-${report.week}-${report.fileName}`),
+        data: report.data
+      }));
+      const zip = createZip(files);
+      const url = URL.createObjectURL(zip);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `周报打包-${new Date().toISOString().slice(0, 10)}.zip`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -444,27 +582,34 @@
       const report = await getReport(id);
       if(!report || !preview) return;
       if(activePreviewUrl) URL.revokeObjectURL(activePreviewUrl);
-      activePreviewUrl = buildBlobUrl(report);
+      activePreviewUrl = buildBlobUrl(report, Boolean(report.pdfData));
       const lowerName = report.fileName.toLowerCase();
-      if(lowerName.endsWith(".pdf")){
+      if(lowerName.endsWith(".pdf") || report.pdfData){
         preview.innerHTML = `<iframe title="${escapeHtml(report.fileName)}" src="${activePreviewUrl}"></iframe>`;
       }else{
         preview.innerHTML = `
           <div class="report-preview-card">
             <strong>${escapeHtml(report.fileName)}</strong>
             <span>${escapeHtml(report.name)} · ${escapeHtml(report.week)} · ${formatSize(report.fileSize)}</span>
-            <span>Word 文件受浏览器能力限制，通常需要下载后使用 Word 或 WPS 查看。</span>
+            <span>该文件为 Word 格式。GitHub Pages 静态站点无法在浏览器内调用 LibreOffice 转 PDF；接入后端转换服务后可在此处直接预览转换后的 PDF。</span>
             <button class="btn-primary" data-download-current="${report.id}" type="button">下载文件</button>
           </div>`;
       }
     };
 
+    const updateSelectedCount = ()=>{
+      if(!selectedCount) return;
+      const count = $$("[data-select-report]:checked", root).length;
+      selectedCount.textContent = count ? `已选择 ${count} 个文件` : "未选择文件";
+    };
+
     const renderReports = async ()=>{
       if(!reportList) return;
-      const reports = (await getReports()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
+      const reports = getVisibleReports(await getReports());
       if(!reports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
         if(reportCount) reportCount.textContent = "0";
+        updateSelectedCount();
         return;
       }
       if(reportCount) reportCount.textContent = String(reports.length);
@@ -473,14 +618,17 @@
         return `
           <div class="report-item" data-report-id="${report.id}">
             <div class="report-item-head">
-              <div>
-                <div class="report-item-title">${escapeHtml(report.name)}</div>
-                <div class="report-item-meta">
-                  <span>${escapeHtml(report.week)}</span>
-                  <span>${escapeHtml(report.fileName)} · ${formatSize(report.fileSize)}</span>
-                  <span>${uploaded}</span>
+              <label class="report-item-main">
+                <input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}"/>
+                <div>
+                  <div class="report-item-title">${escapeHtml(report.name)}</div>
+                  <div class="report-item-meta">
+                    <span>${escapeHtml(report.week)}</span>
+                    <span>${escapeHtml(report.fileName)} · ${formatSize(report.fileSize)}</span>
+                    <span>${uploaded}</span>
+                  </div>
                 </div>
-              </div>
+              </label>
             </div>
             <div class="report-item-actions">
               <button class="btn-secondary" data-preview-report="${report.id}" type="button">在线查看</button>
@@ -488,13 +636,20 @@
             </div>
           </div>`;
       }).join("");
+      updateSelectedCount();
     };
 
     root.addEventListener("click", (event)=>{
       const previewButton = event.target.closest("[data-preview-report]");
       const downloadButton = event.target.closest("[data-download-report], [data-download-current]");
+      const downloadSelectedButton = event.target.closest("[data-download-selected]");
       if(previewButton) previewReport(previewButton.dataset.previewReport);
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
+      if(downloadSelectedButton) downloadSelectedReports();
+    });
+
+    root.addEventListener("change", (event)=>{
+      if(event.target.closest("[data-select-report]")) updateSelectedCount();
     });
   };
 
