@@ -253,16 +253,27 @@
   };
 
   const initWeeklyReport = (root)=>{
-    const userCode = "0000";
-    const adminCode = "1111";
+    const users = {
+      "20240901072": {password:"0000", role:"user"},
+      "202513021024": {password:"0000", role:"user"},
+      "202309021299": {password:"0000", role:"user"},
+      "202513131209": {password:"0000", role:"user"},
+      "202513131162": {password:"0000", role:"user"},
+      "202513131180": {password:"0000", role:"user"},
+      "202409131254": {password:"0000", role:"user"},
+      "202413021006": {password:"0000", role:"user"},
+      "admin": {password:"admin", role:"admin"}
+    };
     const gate = $("[data-report-gate]", root);
     const userPanel = $("[data-user-panel]", root);
     const adminPanel = $("[data-admin-panel]", root);
     const uploadForm = $("[data-upload-form]", root);
     const reportList = $("[data-report-list]", root);
     const preview = $("[data-report-preview]", root);
+    const reportCount = $("[data-report-count]", root);
     const dbName = "aio4cps-weekly-reports";
     const storeName = "reports";
+    let currentUser = null;
     let activePreviewUrl = "";
 
     const setMessage = (el, text, type)=>{
@@ -322,10 +333,17 @@
       return name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx");
     };
 
-    const showPanel = (role)=>{
+    const showPanel = (account)=>{
+      currentUser = account;
+      const role = account.role;
       if(gate) gate.hidden = true;
       if(userPanel) userPanel.hidden = role !== "user";
       if(adminPanel) adminPanel.hidden = role !== "admin";
+      $$("[data-current-user]", root).forEach(el=>{
+        el.textContent = `${account.username} · ${role === "admin" ? "管理员" : "用户"}`;
+      });
+      const reportName = $("#reportName", root);
+      if(reportName && role === "user") reportName.value = account.username;
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
       if(role === "admin") renderReports();
     };
@@ -334,6 +352,7 @@
       if(gate) gate.hidden = false;
       if(userPanel) userPanel.hidden = true;
       if(adminPanel) adminPanel.hidden = true;
+      currentUser = null;
       if(activePreviewUrl){
         URL.revokeObjectURL(activePreviewUrl);
         activePreviewUrl = "";
@@ -341,22 +360,23 @@
       if(preview) preview.innerHTML = '<div class="report-empty">请选择一份周报进行查看。</div>';
     };
 
-    $$("[data-report-login]", root).forEach(form=>{
-      form.addEventListener("submit", (event)=>{
+    const loginForm = $("[data-report-login]", root);
+    if(loginForm){
+      loginForm.addEventListener("submit", (event)=>{
         event.preventDefault();
-        const role = form.dataset.reportLogin;
-        const input = $("input", form);
-        const msg = $("[data-report-message]", form);
-        const pass = role === "admin" ? adminCode : userCode;
-        if(input && input.value.trim() === pass){
-          setMessage(msg, "验证通过。", "success");
-          showPanel(role);
-          input.value = "";
+        const msg = $("[data-report-message]", loginForm);
+        const username = String(new FormData(loginForm).get("username") || "").trim();
+        const password = String(new FormData(loginForm).get("password") || "");
+        const account = users[username];
+        if(account && account.password === password){
+          setMessage(msg, "登录成功。", "success");
+          showPanel({username, role: account.role});
+          loginForm.reset();
         }else{
-          setMessage(msg, "验证码不正确，请重新输入。", "error");
+          setMessage(msg, "用户名或密码不正确。", "error");
         }
       });
-    });
+    }
 
     $$("[data-report-logout]", root).forEach(button=>{
       button.addEventListener("click", logout);
@@ -367,7 +387,7 @@
         event.preventDefault();
         const msg = $("[data-upload-message]", uploadForm);
         const formData = new FormData(uploadForm);
-        const name = String(formData.get("name") || "").trim();
+        const name = currentUser && currentUser.role === "user" ? currentUser.username : String(formData.get("name") || "").trim();
         const week = String(formData.get("week") || "").trim();
         const file = formData.get("file");
         if(!name || !week || !(file instanceof File) || !file.name){
@@ -382,6 +402,7 @@
           await saveReport({
             id: (crypto.randomUUID && crypto.randomUUID()) || `${Date.now()}-${Math.random()}`,
             name,
+            username: name,
             week,
             fileName: file.name,
             fileType: file.type || "application/octet-stream",
@@ -390,6 +411,8 @@
             data: await file.arrayBuffer()
           });
           uploadForm.reset();
+          const reportName = $("#reportName", uploadForm);
+          if(reportName && currentUser) reportName.value = currentUser.username;
           const weekSelect = $("#reportWeek", uploadForm);
           if(weekSelect) weekSelect.selectedIndex = 0;
           setMessage(msg, "周报已提交。", "success");
@@ -441,8 +464,10 @@
       const reports = (await getReports()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
       if(!reports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
+        if(reportCount) reportCount.textContent = "0";
         return;
       }
+      if(reportCount) reportCount.textContent = String(reports.length);
       reportList.innerHTML = reports.map(report=>{
         const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
         return `
