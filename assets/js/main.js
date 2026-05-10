@@ -273,14 +273,27 @@
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
     const selectedCount = $("[data-selected-count]", root);
+    const uploadMask = $("[data-upload-mask]", root);
+    const filterName = $("[data-filter-name]", root);
+    const filterWeek = $("[data-filter-week]", root);
     const reportApiBase = window.AIO4CPS_REPORT_API || "";
     let currentUser = null;
+    let cachedReports = [];
 
     const setMessage = (el, text, type)=>{
       if(!el) return;
       el.textContent = text || "";
       el.classList.toggle("is-error", type === "error");
       el.classList.toggle("is-success", type === "success");
+    };
+
+    const setUploading = (uploading)=>{
+      if(uploadMask) uploadMask.hidden = !uploading;
+      if(uploadForm){
+        $$("input,select,button", uploadForm).forEach(control=>{
+          control.disabled = uploading;
+        });
+      }
     };
 
     const apiUrl = (path)=>`${reportApiBase.replace(/\/$/, "")}${path}`;
@@ -495,6 +508,7 @@
           return;
         }
         try{
+          setUploading(true);
           const result = await saveReport({
             meta: {
               id: reportIdFor(username, week),
@@ -522,6 +536,8 @@
           setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
         }catch(error){
           setMessage(msg, error.message || "保存失败，请检查服务器存储接口后重试。", "error");
+        }finally{
+          setUploading(false);
         }
       });
     }
@@ -669,22 +685,28 @@
       selectedCount.textContent = count ? `已选择 ${count} 个文件` : "未选择文件";
     };
 
-    const renderReports = async ()=>{
+    const getFilteredReports = ()=>{
+      const nameValue = filterName ? filterName.value.trim().toLowerCase() : "";
+      const weekValue = filterWeek ? filterWeek.value : "";
+      return cachedReports.filter(report=>{
+        const nameText = `${report.name || ""} ${report.username || ""}`.toLowerCase();
+        const weekText = String(report.week || "");
+        const matchesName = !nameValue || nameText.includes(nameValue);
+        const matchesWeek = !weekValue || weekText.includes(weekValue);
+        return matchesName && matchesWeek;
+      });
+    };
+
+    const paintReportList = ()=>{
       if(!reportList) return;
-      if(!reportApiBase){
-        reportList.innerHTML = '<div class="report-empty">尚未配置服务器存储接口。GitHub Pages 静态页面不能直接保存跨设备上传文件。</div>';
-        if(reportCount) reportCount.textContent = "0";
-        updateSelectedCount();
-        return;
-      }
-      const reports = getVisibleReports(await getReports());
+      const reports = getFilteredReports();
       if(!reports.length){
-        reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
-        if(reportCount) reportCount.textContent = "0";
+        reportList.innerHTML = '<div class="report-empty">没有符合条件的周报。</div>';
+        if(reportCount) reportCount.textContent = String(cachedReports.length);
         updateSelectedCount();
         return;
       }
-      if(reportCount) reportCount.textContent = String(reports.length);
+      if(reportCount) reportCount.textContent = String(cachedReports.length);
       reportList.innerHTML = reports.map(report=>{
         const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
         return `
@@ -712,6 +734,25 @@
       updateSelectedCount();
     };
 
+    const renderReports = async ()=>{
+      if(!reportList) return;
+      if(!reportApiBase){
+        reportList.innerHTML = '<div class="report-empty">尚未配置服务器存储接口。GitHub Pages 静态页面不能直接保存跨设备上传文件。</div>';
+        cachedReports = [];
+        if(reportCount) reportCount.textContent = "0";
+        updateSelectedCount();
+        return;
+      }
+      cachedReports = getVisibleReports(await getReports());
+      if(!cachedReports.length){
+        reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
+        if(reportCount) reportCount.textContent = "0";
+        updateSelectedCount();
+        return;
+      }
+      paintReportList();
+    };
+
     root.addEventListener("click", (event)=>{
       const previewButton = event.target.closest("[data-preview-report]");
       const downloadButton = event.target.closest("[data-download-report], [data-download-current]");
@@ -727,6 +768,11 @@
 
     root.addEventListener("change", (event)=>{
       if(event.target.closest("[data-select-report]")) updateSelectedCount();
+      if(event.target.closest("[data-filter-week]")) paintReportList();
+    });
+
+    root.addEventListener("input", (event)=>{
+      if(event.target.closest("[data-filter-name]")) paintReportList();
     });
   };
 

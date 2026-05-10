@@ -59,6 +59,13 @@
 </section>
 <section class="section report-section" data-weekly-report="">
 <div class="container">
+<div class="upload-mask" data-upload-mask="" hidden="">
+<div class="upload-dialog">
+<div class="upload-spinner" aria-hidden="true"></div>
+<strong>上传中...</strong>
+<span>文件正在提交到服务器，请不要关闭页面。</span>
+</div>
+</div>
 <div class="affairs-login-layout reveal" data-report-gate="">
 <aside class="affairs-module-card">
 <span class="section-chip">模块</span>
@@ -200,6 +207,22 @@
 <h2>提交列表</h2>
 </div>
 <div class="report-toolbar">
+<label class="filter-field">姓名
+<input class="form-input" data-filter-name="" placeholder="输入姓名/学号" type="search"/>
+</label>
+<label class="filter-field">周次
+<select class="form-input" data-filter-week="">
+<option value="">全部周次</option>
+<option value="第1周">第1周</option>
+<option value="第2周">第2周</option>
+<option value="第3周">第3周</option>
+<option value="第4周">第4周</option>
+<option value="第5周">第5周</option>
+<option value="第6周">第6周</option>
+<option value="第7周">第7周</option>
+<option value="第8周">第8周</option>
+</select>
+</label>
 <button class="btn-secondary" data-download-selected="" type="button">打包下载</button>
 <button class="btn-danger" data-delete-selected="" type="button">删除所选</button>
 <span data-selected-count="">未选择文件</span>

@@ -182,6 +182,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 /* weekly report */
 .page-weekly-report{background:#eef5fb}
 .page-weekly-report .topbar{box-shadow:0 1px 0 rgba(200,216,234,.72);border-bottom-color:rgba(200,216,234,.86)}
+.page-weekly-report .container{max-width:min(1560px,calc(100vw - 48px));padding:0 18px}
 .report-section{padding-top:24px}
 .report-access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
 .report-access-card,.report-panel{padding:24px}
@@ -213,7 +214,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .report-preview iframe,.report-preview object{width:100%;height:100%;min-height:500px;border:0;border-radius:8px;background:#fff}
 .report-preview-card{display:grid;gap:14px;padding:22px;border:1px dashed var(--line-strong);border-radius:8px;background:#fff;color:var(--muted);line-height:1.7}
 .report-preview-card strong{color:var(--text)}
-.affairs-login-layout{display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,.55fr);gap:20px;align-items:stretch;max-width:1080px;margin:0 auto}
+.affairs-login-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(380px,.5fr);gap:20px;align-items:stretch;max-width:1320px;margin:0 auto}
 .affairs-module-card,.affairs-login-card,.affairs-sidebar,.report-panel,.affairs-appbar{background:#fff;border:1px solid #d7e6f5;border-radius:8px;box-shadow:0 14px 34px rgba(25,61,98,.07)}
 .affairs-module-card,.affairs-login-card,.affairs-sidebar{padding:28px}
 .affairs-module-card{display:flex;flex-direction:column;justify-content:space-between;min-height:300px;background:#fff}
@@ -238,9 +239,11 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .report-dashboard .metric-small{font-size:30px}
 .report-tip{margin:6px 0 0;color:var(--primary);font-size:14px;font-weight:700;line-height:1.6}
 .form-input[readonly]{background:#f6f9fd;color:var(--muted)}
-.report-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px;font-weight:700}
+.report-toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px;font-weight:700}
 .report-toolbar .btn-secondary{padding:9px 12px;border-radius:12px}
 .report-toolbar .btn-danger{padding:9px 12px;border-radius:12px}
+.filter-field{display:grid;gap:6px;min-width:150px;color:var(--muted);font-size:13px;font-weight:800}
+.filter-field .form-input{min-height:38px;padding:8px 10px}
 .btn-danger{display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(180,35,24,.18);background:#fff;color:#b42318;font-weight:800;transition:.2s ease}
 .btn-danger:hover{background:#fff3f1;border-color:rgba(180,35,24,.28)}
 .report-panel{padding:24px}
@@ -255,6 +258,12 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .page-weekly-report .btn-primary{border-radius:8px;box-shadow:0 8px 16px rgba(31,95,174,.16)}
 .page-weekly-report .btn-secondary{border-radius:8px}
 .page-weekly-report .form-input{border-radius:8px}
+.upload-mask{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(15,35,58,.35);backdrop-filter:blur(4px)}
+.upload-mask[hidden]{display:none}
+.upload-dialog{display:grid;place-items:center;gap:12px;width:min(360px,calc(100vw - 44px));padding:28px;background:#fff;border:1px solid #d7e6f5;border-radius:12px;box-shadow:0 24px 60px rgba(15,35,58,.18);text-align:center;color:var(--text)}
+.upload-dialog span{color:var(--muted);line-height:1.6}
+.upload-spinner{width:42px;height:42px;border-radius:50%;border:4px solid #dbeafe;border-top-color:var(--primary);animation:upload-spin .8s linear infinite}
+@keyframes upload-spin{to{transform:rotate(360deg)}}
 @media (max-width:1024px){
   .intro-shell,.home-overview-grid,.mentor-card-modern,.cooperation-cta,.report-admin-grid,.affairs-login-layout,.affairs-shell{grid-template-columns:1fr}
   .affairs-sidebar{position:static}
@@ -280,6 +289,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .affairs-appbar{grid-template-columns:1fr;display:grid}
   .profile-grid{grid-template-columns:1fr;gap:8px}
   .profile-actions{justify-content:flex-start}
+  .page-weekly-report .container{max-width:100%;padding:0 16px}
 }
 
 
