@@ -208,7 +208,8 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .report-item-title{font-weight:800;font-size:18px;line-height:1.35}
 .report-item-meta{display:grid;gap:4px;color:var(--muted);font-size:14px;line-height:1.55}
 .report-item-actions{display:flex;flex-wrap:wrap;gap:8px}
-.report-item-actions .btn-secondary,.report-item-actions .btn-primary{padding:9px 12px;border-radius:12px;font-size:14px}
+.report-item-actions .btn-secondary,.report-item-actions .btn-primary,.report-item-actions .btn-danger{padding:9px 12px;border-radius:12px;font-size:14px}
+.report-item-actions button:disabled{opacity:.45;cursor:not-allowed}
 .report-empty{display:grid;place-items:center;min-height:180px;padding:26px;border:1px dashed var(--line-strong);border-radius:16px;color:var(--muted);background:#fff;text-align:center;line-height:1.7}
 .report-preview{min-height:520px;height:68vh;resize:vertical;overflow:auto;border:1px solid #d8e5f2;border-radius:8px;background:#fff}
 .report-preview iframe,.report-preview object{width:100%;height:100%;min-height:500px;border:0;border-radius:8px;background:#fff}

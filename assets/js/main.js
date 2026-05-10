@@ -709,6 +709,15 @@
       if(reportCount) reportCount.textContent = String(cachedReports.length);
       reportList.innerHTML = reports.map(report=>{
         const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
+        const lowerName = String(report.fileName || "").toLowerCase();
+        const previewUrl = report.pdfUrl || (lowerName.endsWith(".pdf") ? (report.url || report.downloadUrl) : "");
+        const downloadUrl = report.downloadUrl || report.url || report.pdfUrl || "";
+        const previewAction = previewUrl
+          ? `<a class="btn-secondary" href="${escapeHtml(previewUrl)}" rel="noopener" target="_blank">在线查看</a>`
+          : `<button class="btn-secondary" disabled="" type="button">暂无预览</button>`;
+        const downloadAction = downloadUrl
+          ? `<a class="btn-primary" href="${escapeHtml(downloadUrl)}" rel="noopener" target="_blank">下载</a>`
+          : `<button class="btn-primary" disabled="" type="button">下载</button>`;
         return `
           <div class="report-item" data-report-id="${report.id}">
             <div class="report-item-head">
@@ -725,8 +734,8 @@
               </label>
             </div>
             <div class="report-item-actions">
-              <button class="btn-secondary" data-preview-report="${report.id}" type="button">在线查看</button>
-              <button class="btn-primary" data-download-report="${report.id}" type="button">下载</button>
+              ${previewAction}
+              ${downloadAction}
               <button class="btn-danger" data-delete-report="${report.id}" type="button">删除</button>
             </div>
           </div>`;
@@ -754,12 +763,10 @@
     };
 
     root.addEventListener("click", (event)=>{
-      const previewButton = event.target.closest("[data-preview-report]");
       const downloadButton = event.target.closest("[data-download-report], [data-download-current]");
       const downloadSelectedButton = event.target.closest("[data-download-selected]");
       const deleteButton = event.target.closest("[data-delete-report]");
       const deleteSelectedButton = event.target.closest("[data-delete-selected]");
-      if(previewButton) previewReport(previewButton.dataset.previewReport);
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
       if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
