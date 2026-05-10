@@ -254,14 +254,14 @@
 
   const initWeeklyReport = (root)=>{
     const users = {
-      "20240901072": {password:"0000", role:"user"},
-      "202513021024": {password:"0000", role:"user"},
-      "202309021299": {password:"0000", role:"user"},
-      "202513131209": {password:"0000", role:"user"},
-      "202513131162": {password:"0000", role:"user"},
-      "202513131180": {password:"0000", role:"user"},
-      "202409131254": {password:"0000", role:"user"},
-      "202413021006": {password:"0000", role:"user"},
+      "20240901072": {password:"0000", role:"user", name:"苏章圣", college:"材料科学与工程", major:"冶金工程", entryYear:"2024", phone:"15987963968", email:"1253296002@qq.com"},
+      "202513021024": {password:"0000", role:"user", name:"皮景升", college:"自动化学院", major:"控制科学与工程", entryYear:"2025", phone:"19562171350", email:"3137165096@qq.com"},
+      "202309021299": {password:"0000", role:"user", name:"孙禄冰", college:"材料科学与工程", major:"冶金工程", entryYear:"2023", phone:"13062320535", email:"1255996389@qq.com"},
+      "202513131209": {password:"0000", role:"user", name:"蒋卓隽", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"13629647969", email:"2515193390@qq.com"},
+      "202513131162": {password:"0000", role:"user", name:"陈佳玲", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"17775609276", email:"2985078918@qq.com"},
+      "202513131180": {password:"0000", role:"user", name:"张富均", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"15923858308", email:"15923858308@163.com"},
+      "202409131254": {password:"0000", role:"user", name:"罗庆暄", college:"材料科学与工程", major:"材料与化工", entryYear:"2024", phone:"17783598675", email:"709235262@qq.com"},
+      "202413021006": {password:"0000", role:"user", name:"刘涛", college:"自动化学院", major:"控制科学与工程", entryYear:"2024", phone:"19855816903", email:"19855816903@163.com"},
       "admin": {password:"admin", role:"admin"}
     };
     const gate = $("[data-report-gate]", root);
@@ -340,10 +340,11 @@
     const profileKey = (username)=>`aio4cps-profile-${username}`;
 
     const getProfile = (username)=>{
+      const defaults = users[username] || {};
       try{
-        return JSON.parse(localStorage.getItem(profileKey(username)) || "{}");
+        return {...defaults, ...JSON.parse(localStorage.getItem(profileKey(username)) || "{}")};
       }catch(error){
-        return {};
+        return {...defaults};
       }
     };
 
@@ -353,7 +354,7 @@
 
     const getDisplayName = (username)=>{
       const profile = getProfile(username);
-      return profile.displayName || username;
+      return profile.displayName || profile.name || username;
     };
 
     const updateCurrentUserText = ()=>{
@@ -400,8 +401,22 @@
       updateCurrentUserText();
       const reportName = $("#reportName", root);
       if(reportName && role === "user") reportName.value = getDisplayName(account.username);
-      const displayName = $("#displayName", root);
-      if(displayName && role === "user") displayName.value = getProfile(account.username).displayName || "";
+      if(role === "user"){
+        const profile = getProfile(account.username);
+        const profileFields = {
+          displayName: profile.displayName || profile.name || "",
+          college: profile.college || "",
+          major: profile.major || "",
+          entryYear: profile.entryYear || "",
+          studentId: account.username,
+          phone: profile.phone || "",
+          email: profile.email || ""
+        };
+        Object.entries(profileFields).forEach(([key, value])=>{
+          const input = $(`[name="${key}"]`, root);
+          if(input) input.value = value;
+        });
+      }
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
       if(role === "admin") renderReports();
       window.scrollTo({top:0, behavior:"smooth"});
@@ -444,12 +459,20 @@
         event.preventDefault();
         if(!currentUser || currentUser.role !== "user") return;
         const msg = $("[data-profile-message]", profileForm);
-        const displayName = String(new FormData(profileForm).get("displayName") || "").trim();
-        saveProfile(currentUser.username, {displayName});
+        const formData = new FormData(profileForm);
+        const profile = {
+          displayName: String(formData.get("displayName") || "").trim(),
+          college: String(formData.get("college") || "").trim(),
+          major: String(formData.get("major") || "").trim(),
+          entryYear: String(formData.get("entryYear") || "").trim(),
+          phone: String(formData.get("phone") || "").trim(),
+          email: String(formData.get("email") || "").trim()
+        };
+        saveProfile(currentUser.username, profile);
         updateCurrentUserText();
         const reportName = $("#reportName", root);
         if(reportName) reportName.value = getDisplayName(currentUser.username);
-        setMessage(msg, displayName ? "姓名已保存。" : "姓名已清空，将使用学号显示。", "success");
+        setMessage(msg, "个人资料已保存。", "success");
       });
     }
 
@@ -459,6 +482,7 @@
         const msg = $("[data-upload-message]", uploadForm);
         const formData = new FormData(uploadForm);
         const username = currentUser && currentUser.role === "user" ? currentUser.username : String(formData.get("name") || "").trim();
+        const profile = currentUser && currentUser.role === "user" ? getProfile(currentUser.username) : {};
         const name = currentUser && currentUser.role === "user" ? getDisplayName(currentUser.username) : username;
         const week = String(formData.get("week") || "").trim();
         const file = formData.get("file");
@@ -476,6 +500,12 @@
               id: reportIdFor(username, week),
               name,
               username,
+              displayName: name,
+              college: profile.college || "",
+              major: profile.major || "",
+              entryYear: profile.entryYear || "",
+              phone: profile.phone || "",
+              email: profile.email || "",
               week,
               fileName: file.name,
               fileType: file.type || "application/octet-stream",

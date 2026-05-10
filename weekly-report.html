@@ -107,14 +107,28 @@
 <div class="report-panel-head">
 <div>
 <span class="section-chip">个人信息</span>
-<h2>设置姓名</h2>
-<p>使用学号登录后，可在这里填写真实姓名；管理员列表会同时显示姓名和学号。</p>
+<h2>个人资料</h2>
+<p>系统已内置默认资料，可按需修改联系方式等信息。</p>
 </div>
 </div>
 <form class="profile-form" data-profile-form="">
+<div class="profile-grid">
 <label class="form-label" for="displayName">姓名</label>
-<div class="profile-row">
 <input class="form-input" id="displayName" name="displayName" placeholder="请输入姓名" type="text"/>
+<label class="form-label" for="college">学院</label>
+<input class="form-input" id="college" name="college" placeholder="请输入学院" type="text"/>
+<label class="form-label" for="major">专业</label>
+<input class="form-input" id="major" name="major" placeholder="请输入专业" type="text"/>
+<label class="form-label" for="entryYear">入学年</label>
+<input class="form-input" id="entryYear" name="entryYear" placeholder="请输入入学年" type="text"/>
+<label class="form-label" for="studentId">学号</label>
+<input class="form-input" id="studentId" name="studentId" readonly="" type="text"/>
+<label class="form-label" for="phone">联系手机号</label>
+<input class="form-input" id="phone" name="phone" placeholder="请输入联系手机号" type="tel"/>
+<label class="form-label" for="email">联系邮箱</label>
+<input class="form-input" id="email" name="email" placeholder="请输入联系邮箱" type="email"/>
+</div>
+<div class="profile-actions">
 <button class="btn-secondary" type="submit">保存</button>
 </div>
 <p class="form-message" data-profile-message=""></p>
@@ -193,18 +207,6 @@
 </div>
 <div class="report-list" data-report-list="">
 <div class="report-empty">暂无周报记录。</div>
-</div>
-</article>
-<article class="report-panel report-preview-panel reveal">
-<div class="report-panel-head">
-<div>
-<span class="section-chip">PDF 预览</span>
-<h2>文件预览</h2>
-<p>点击“在线查看”将在新标签页打开 PDF，使用浏览器自带预览。</p>
-</div>
-</div>
-<div class="report-preview" data-report-preview="">
-<div class="report-empty">在线查看会在新标签页打开 PDF。</div>
 </div>
 </article>
 </section>

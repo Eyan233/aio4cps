@@ -245,8 +245,10 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .btn-danger:hover{background:#fff3f1;border-color:rgba(180,35,24,.28)}
 .report-panel{padding:24px}
 .report-preview-panel{grid-column:1 / -1}
-.profile-form{max-width:620px}
-.profile-row{display:grid;grid-template-columns:1fr auto;gap:10px}
+.profile-form{max-width:860px}
+.profile-grid{display:grid;grid-template-columns:120px minmax(0,1fr);gap:10px 14px;align-items:center}
+.profile-grid .form-label{margin:0}
+.profile-actions{display:flex;justify-content:flex-end;margin-top:16px}
 .affairs-authenticated .affairs-public-hero{display:none}
 .affairs-authenticated .report-section{padding-top:22px}
 .page-weekly-report .section-chip{border-radius:999px;background:#eaf3ff}
@@ -275,7 +277,9 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .report-preview{height:62vh;min-height:420px}
   .affairs-module-card,.affairs-login-card,.affairs-sidebar,.report-panel{padding:20px}
   .report-dashboard{grid-template-columns:1fr}
-  .affairs-appbar,.profile-row{grid-template-columns:1fr;display:grid}
+  .affairs-appbar{grid-template-columns:1fr;display:grid}
+  .profile-grid{grid-template-columns:1fr;gap:8px}
+  .profile-actions{justify-content:flex-start}
 }
 
 
