@@ -201,15 +201,18 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .report-form{display:grid;gap:2px;max-width:620px}
 .report-file-input{padding:10px;background:#fff}
 .report-admin-grid{display:grid;grid-template-columns:minmax(320px,.88fr) minmax(0,1.12fr);gap:18px;align-items:start}
-.report-list{display:grid;gap:12px}
-.report-item{display:grid;gap:10px;padding:16px;border:1px solid #d8e5f2;border-radius:8px;background:#fbfdff}
-.report-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.report-item-main{display:flex;align-items:flex-start;gap:12px}
-.report-select{width:18px;height:18px;margin-top:3px;accent-color:var(--primary);flex:none}
-.report-item-title{font-weight:800;font-size:18px;line-height:1.35}
-.report-item-meta{display:grid;gap:4px;color:var(--muted);font-size:14px;line-height:1.55}
-.report-item-actions{display:flex;flex-wrap:wrap;gap:8px}
-.report-item-actions .btn-secondary,.report-item-actions .btn-primary,.report-item-actions .btn-danger{padding:9px 12px;border-radius:12px;font-size:14px}
+.report-list,.user-history-list{display:grid;gap:0;border:1px solid #d8e5f2;border-radius:8px;overflow:hidden;background:#fff}
+.report-table-head,.report-item{display:grid;grid-template-columns:34px minmax(130px,.72fr) minmax(150px,.8fr) minmax(220px,1.35fr) minmax(138px,.72fr) minmax(190px,auto);gap:10px;align-items:center}
+.report-table-head{padding:10px 12px;background:#f1f7fd;color:var(--muted);font-size:13px;font-weight:800;border-bottom:1px solid #d8e5f2}
+.report-item{padding:9px 12px;border:0;border-bottom:1px solid #e4edf6;border-radius:0;background:#fff}
+.report-item:last-child{border-bottom:0}
+.report-select{width:18px;height:18px;accent-color:var(--primary);flex:none}
+.report-item-title{font-weight:800;font-size:16px;line-height:1.35}
+.report-item-cell{min-width:0;color:var(--muted);font-size:14px;line-height:1.45}
+.report-item-cell strong{display:block;color:var(--text);font-size:15px;line-height:1.35}
+.report-file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.report-item-actions{display:flex;justify-content:flex-end;gap:7px;white-space:nowrap}
+.report-item-actions .btn-secondary,.report-item-actions .btn-primary,.report-item-actions .btn-danger{padding:8px 10px;border-radius:8px;font-size:13px}
 .report-item-actions button:disabled{opacity:.45;cursor:not-allowed}
 .report-empty{display:grid;place-items:center;min-height:180px;padding:26px;border:1px dashed var(--line-strong);border-radius:16px;color:var(--muted);background:#fff;text-align:center;line-height:1.7}
 .report-preview{min-height:520px;height:68vh;resize:vertical;overflow:auto;border:1px solid #d8e5f2;border-radius:8px;background:#fff}
@@ -246,6 +249,26 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .report-toolbar .btn-danger{padding:9px 12px;border-radius:12px}
 .filter-field{display:grid;gap:6px;min-width:150px;color:var(--muted);font-size:13px;font-weight:800}
 .filter-field .form-input{min-height:38px;padding:8px 10px}
+.weekly-progress-card{display:grid;gap:10px;padding-top:16px;border-top:1px solid #e1edf8}
+.weekly-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px;font-weight:800}
+.weekly-progress-head strong{color:var(--primary);font-size:22px}
+.weekly-progress-bar{height:8px;border-radius:999px;background:#eaf2fb;overflow:hidden}
+.weekly-progress-bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0b73e5,#16a34a)}
+.weekly-progress-list{display:grid;gap:10px;max-height:280px;overflow:auto}
+.progress-group{display:grid;gap:6px}
+.progress-group-title{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;font-weight:800}
+.progress-row{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:13px}
+.progress-row strong{color:var(--text)}
+.progress-row .done{color:var(--accent);font-weight:800}
+.progress-row .missing{color:#b42318;font-weight:800}
+.admin-user-form{margin-bottom:16px}
+.admin-user-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end}
+.admin-user-actions{display:flex;gap:8px;align-items:end}
+.user-list{display:grid;gap:8px}
+.user-row{display:grid;grid-template-columns:minmax(110px,.55fr) minmax(90px,.42fr) minmax(140px,.7fr) minmax(140px,.8fr) minmax(110px,.55fr) minmax(160px,.9fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #d8e5f2;border-radius:8px;background:#fbfdff;color:var(--muted);font-size:13px}
+.user-row strong{display:block;color:var(--text);font-size:15px}
+.user-row-actions{display:flex;justify-content:flex-end;gap:7px;white-space:nowrap}
+.user-row-actions .btn-secondary,.user-row-actions .btn-danger{padding:8px 10px;border-radius:8px;font-size:13px}
 .btn-danger{display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(180,35,24,.18);background:#fff;color:#b42318;font-weight:800;transition:.2s ease}
 .btn-danger:hover{background:#fff3f1;border-color:rgba(180,35,24,.28)}
 .report-panel{padding:24px}
@@ -269,6 +292,10 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 @media (max-width:1024px){
   .intro-shell,.home-overview-grid,.mentor-card-modern,.cooperation-cta,.report-admin-grid,.affairs-login-layout,.affairs-shell{grid-template-columns:1fr}
   .affairs-sidebar{position:static}
+  .report-table-head{display:none}
+  .report-item,.user-row{grid-template-columns:1fr}
+  .report-item-actions,.user-row-actions{justify-content:flex-start;flex-wrap:wrap}
+  .admin-user-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mentor-card-photo{padding:0 28px 28px}
   .cooperation-cta-action{justify-content:flex-start}
 }
@@ -284,6 +311,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .report-access-grid,.report-code-row{grid-template-columns:1fr}
   .report-panel-head,.report-item-head{display:grid}
   .report-item-main{gap:10px}
+  .admin-user-grid{grid-template-columns:1fr}
   .report-preview iframe,.report-preview object{min-height:420px}
   .report-preview{height:62vh;min-height:420px}
   .affairs-module-card,.affairs-login-card,.affairs-sidebar,.report-panel{padding:20px}

@@ -270,15 +270,22 @@
     const uploadForm = $("[data-upload-form]", root);
     const profileForm = $("[data-profile-form]", root);
     const reportList = $("[data-report-list]", root);
+    const userHistory = $("[data-user-history]", root);
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
     const selectedCount = $("[data-selected-count]", root);
     const uploadMask = $("[data-upload-mask]", root);
     const filterName = $("[data-filter-name]", root);
     const filterWeek = $("[data-filter-week]", root);
+    const progressSummary = $("[data-progress-summary]", root);
+    const progressBar = $("[data-progress-bar]", root);
+    const progressList = $("[data-progress-list]", root);
+    const adminUserForm = $("[data-admin-user-form]", root);
+    const userList = $("[data-user-list]", root);
     const reportApiBase = window.AIO4CPS_REPORT_API || "";
     let currentUser = null;
     let cachedReports = [];
+    let cloudUsers = [];
 
     const setMessage = (el, text, type)=>{
       if(!el) return;
@@ -336,6 +343,61 @@
 
     const deleteReport = async (id)=>requestJson(`/reports/${encodeURIComponent(id)}`, {method:"DELETE"});
 
+    const normalizeUser = (username, profile={})=>({
+      username,
+      password: profile.password || "0000",
+      role: profile.role || "user",
+      displayName: profile.displayName || profile.name || username,
+      name: profile.displayName || profile.name || username,
+      college: profile.college || "",
+      major: profile.major || "",
+      entryYear: profile.entryYear || profile.entry_year || "",
+      phone: profile.phone || "",
+      email: profile.email || ""
+    });
+
+    const defaultUserRows = ()=>Object.entries(users)
+      .filter(([, profile])=>profile.role === "user")
+      .map(([username, profile])=>normalizeUser(username, profile));
+
+    const getCloudUsers = async ()=>{
+      if(!reportApiBase) return defaultUserRows();
+      try{
+        const data = await requestJson("/users");
+        const rows = Array.isArray(data) ? data : (data.users || []);
+        cloudUsers = rows.map(row=>normalizeUser(row.username || row.studentId, row)).filter(row=>row.username);
+        if(userList) delete userList.dataset.userError;
+      }catch(error){
+        cloudUsers = defaultUserRows();
+        if(userList) userList.dataset.userError = error.message || "用户接口不可用";
+      }
+      return cloudUsers.length ? cloudUsers : defaultUserRows();
+    };
+
+    const getUserProfile = async (username)=>{
+      const rows = await getCloudUsers();
+      return rows.find(row=>row.username === username) || normalizeUser(username, users[username] || {});
+    };
+
+    const saveCloudUser = async (profile)=>{
+      saveProfile(profile.username, profile);
+      const existing = users[profile.username] || {};
+      users[profile.username] = {...existing, ...profile, name: profile.displayName || profile.name || profile.username, role: profile.role || existing.role || "user"};
+      if(!reportApiBase) return {localOnly:true};
+      return requestJson("/users", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(profile)
+      });
+    };
+
+    const deleteCloudUser = async (username)=>{
+      delete users[username];
+      localStorage.removeItem(profileKey(username));
+      if(!reportApiBase) return {localOnly:true};
+      return requestJson(`/users/${encodeURIComponent(username)}`, {method:"DELETE"});
+    };
+
     const formatSize = (bytes)=>{
       if(bytes < 1024) return `${bytes} B`;
       if(bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -353,7 +415,8 @@
     const profileKey = (username)=>`aio4cps-profile-${username}`;
 
     const getProfile = (username)=>{
-      const defaults = users[username] || {};
+      const cloudProfile = cloudUsers.find(row=>row.username === username);
+      const defaults = cloudProfile || users[username] || {};
       try{
         return {...defaults, ...JSON.parse(localStorage.getItem(profileKey(username)) || "{}")};
       }catch(error){
@@ -404,13 +467,15 @@
       return Array.from(latest.values()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
     };
 
-    const showPanel = (account)=>{
+    const showPanel = async (account)=>{
       currentUser = account;
       const role = account.role;
       if(gate) gate.hidden = true;
       if(userPanel) userPanel.hidden = role !== "user";
       if(adminPanel) adminPanel.hidden = role !== "admin";
       document.body.classList.add("affairs-authenticated");
+      if(role === "user") await getUserProfile(account.username);
+      if(role === "admin") await getCloudUsers();
       updateCurrentUserText();
       const reportName = $("#reportName", root);
       if(reportName && role === "user") reportName.value = getDisplayName(account.username);
@@ -431,7 +496,11 @@
         });
       }
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
-      if(role === "admin") renderReports();
+      if(role === "user") renderUserHistory();
+      if(role === "admin"){
+        renderReports();
+        renderUsers();
+      }
       window.scrollTo({top:0, behavior:"smooth"});
     };
 
@@ -447,7 +516,7 @@
 
     const loginForm = $("[data-report-login]", root);
     if(loginForm){
-      loginForm.addEventListener("submit", (event)=>{
+      loginForm.addEventListener("submit", async (event)=>{
         event.preventDefault();
         const msg = $("[data-report-message]", loginForm);
         const username = String(new FormData(loginForm).get("username") || "").trim();
@@ -455,7 +524,7 @@
         const account = users[username];
         if(account && account.password === password){
           setMessage(msg, "登录成功。", "success");
-          showPanel({username, role: account.role});
+          await showPanel({username, role: account.role});
           loginForm.reset();
         }else{
           setMessage(msg, "用户名或密码不正确。", "error");
@@ -468,7 +537,7 @@
     });
 
     if(profileForm){
-      profileForm.addEventListener("submit", (event)=>{
+      profileForm.addEventListener("submit", async (event)=>{
         event.preventDefault();
         if(!currentUser || currentUser.role !== "user") return;
         const msg = $("[data-profile-message]", profileForm);
@@ -481,11 +550,16 @@
           phone: String(formData.get("phone") || "").trim(),
           email: String(formData.get("email") || "").trim()
         };
-        saveProfile(currentUser.username, profile);
-        updateCurrentUserText();
-        const reportName = $("#reportName", root);
-        if(reportName) reportName.value = getDisplayName(currentUser.username);
-        setMessage(msg, "个人资料已保存。", "success");
+        try{
+          await saveCloudUser({username:currentUser.username, role:"user", password:"0000", ...profile});
+          await getCloudUsers();
+          updateCurrentUserText();
+          const reportName = $("#reportName", root);
+          if(reportName) reportName.value = getDisplayName(currentUser.username);
+          setMessage(msg, "个人资料已保存到云端。", "success");
+        }catch(error){
+          setMessage(msg, `保存失败：${error.message || "请检查云端用户接口"}`, "error");
+        }
       });
     }
 
@@ -534,6 +608,7 @@
           const weekSelect = $("#reportWeek", uploadForm);
           if(weekSelect) weekSelect.selectedIndex = 0;
           setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
+          await renderUserHistory();
         }catch(error){
           setMessage(msg, error.message || "保存失败，请检查服务器存储接口后重试。", "error");
         }finally{
@@ -707,11 +782,12 @@
         return;
       }
       if(reportCount) reportCount.textContent = String(cachedReports.length);
-      reportList.innerHTML = reports.map(report=>{
+      const rowsHtml = reports.map(report=>{
         const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
         const lowerName = String(report.fileName || "").toLowerCase();
         const previewUrl = report.pdfUrl || (lowerName.endsWith(".pdf") ? (report.url || report.downloadUrl) : "");
         const downloadUrl = report.downloadUrl || report.url || report.pdfUrl || "";
+        const displayName = report.name || report.displayName || report.username || "";
         const previewAction = previewUrl
           ? `<a class="btn-secondary" href="${escapeHtml(previewUrl)}" rel="noopener" target="_blank">在线查看</a>`
           : `<button class="btn-secondary" disabled="" type="button">暂无预览</button>`;
@@ -720,19 +796,11 @@
           : `<button class="btn-primary" disabled="" type="button">下载</button>`;
         return `
           <div class="report-item" data-report-id="${report.id}">
-            <div class="report-item-head">
-              <label class="report-item-main">
-                <input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}"/>
-                <div>
-                  <div class="report-item-title">${escapeHtml(report.name)}</div>
-                  <div class="report-item-meta">
-                    <span>${escapeHtml(report.week)}</span>
-                    <span>${escapeHtml(report.fileName)} · ${formatSize(report.fileSize)}</span>
-                    <span>${uploaded}</span>
-                  </div>
-                </div>
-              </label>
-            </div>
+            <input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的周报"/>
+            <div class="report-item-cell"><strong>${escapeHtml(displayName)}</strong>${escapeHtml(report.username || "")}</div>
+            <div class="report-item-cell">${escapeHtml(report.week)}</div>
+            <div class="report-item-cell report-file-name" title="${escapeHtml(report.fileName)}">${escapeHtml(report.fileName)} · ${formatSize(report.fileSize || 0)}</div>
+            <div class="report-item-cell">${uploaded}</div>
             <div class="report-item-actions">
               ${previewAction}
               ${downloadAction}
@@ -740,7 +808,152 @@
             </div>
           </div>`;
       }).join("");
+      reportList.innerHTML = `
+        <div class="report-table-head">
+          <span></span>
+          <span>成员</span>
+          <span>周次</span>
+          <span>文件</span>
+          <span>提交时间</span>
+          <span>操作</span>
+        </div>
+        ${rowsHtml}`;
       updateSelectedCount();
+    };
+
+    const reportRowHtml = (report, selectable=false)=>{
+      const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
+      const lowerName = String(report.fileName || "").toLowerCase();
+      const previewUrl = report.pdfUrl || (lowerName.endsWith(".pdf") ? (report.url || report.downloadUrl) : "");
+      const downloadUrl = report.downloadUrl || report.url || report.pdfUrl || "";
+      const displayName = report.name || report.displayName || report.username || "";
+      const previewAction = previewUrl
+        ? `<a class="btn-secondary" href="${escapeHtml(previewUrl)}" rel="noopener" target="_blank">在线查看</a>`
+        : `<button class="btn-secondary" disabled="" type="button">暂无预览</button>`;
+      const downloadAction = downloadUrl
+        ? `<a class="btn-primary" href="${escapeHtml(downloadUrl)}" rel="noopener" target="_blank">下载</a>`
+        : `<button class="btn-primary" disabled="" type="button">下载</button>`;
+      return `
+        <div class="report-item" data-report-id="${escapeHtml(report.id)}">
+          ${selectable ? `<input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的周报"/>` : "<span></span>"}
+          <div class="report-item-cell"><strong>${escapeHtml(displayName)}</strong>${escapeHtml(report.username || "")}</div>
+          <div class="report-item-cell">${escapeHtml(report.week)}</div>
+          <div class="report-item-cell report-file-name" title="${escapeHtml(report.fileName)}">${escapeHtml(report.fileName)} · ${formatSize(report.fileSize || 0)}</div>
+          <div class="report-item-cell">${uploaded}</div>
+          <div class="report-item-actions">
+            ${previewAction}
+            ${downloadAction}
+            ${selectable ? `<button class="btn-danger" data-delete-report="${escapeHtml(report.id)}" type="button">删除</button>` : ""}
+          </div>
+        </div>`;
+    };
+
+    const renderUserHistory = async ()=>{
+      if(!userHistory || !currentUser || currentUser.role !== "user") return;
+      if(!reportApiBase){
+        userHistory.innerHTML = '<div class="report-empty">尚未配置服务器存储接口，暂不能跨设备查看历史提交。</div>';
+        return;
+      }
+      try{
+        const reports = getVisibleReports(await getReports())
+          .filter(report=>String(report.username || "") === currentUser.username)
+          .sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
+        if(!reports.length){
+          userHistory.innerHTML = '<div class="report-empty">暂无历史提交记录。</div>';
+          return;
+        }
+        userHistory.innerHTML = `
+          <div class="report-table-head">
+            <span></span>
+            <span>成员</span>
+            <span>周次</span>
+            <span>文件</span>
+            <span>提交时间</span>
+            <span>操作</span>
+          </div>
+          ${reports.map(report=>reportRowHtml(report, false)).join("")}`;
+      }catch(error){
+        userHistory.innerHTML = `<div class="report-empty">提交记录加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
+      }
+    };
+
+    const updateProgress = async ()=>{
+      const rows = await getCloudUsers();
+      const userRows = rows.filter(row=>row.role !== "admin");
+      const currentWeek = "第1周";
+      const submitted = new Set(cachedReports
+        .filter(report=>String(report.week || "").includes(currentWeek))
+        .map(report=>report.username || report.name));
+      const doneRows = userRows.filter(row=>submitted.has(row.username) || submitted.has(row.displayName) || submitted.has(row.name));
+      const missingRows = userRows.filter(row=>!submitted.has(row.username) && !submitted.has(row.displayName) && !submitted.has(row.name));
+      const doneCount = doneRows.length;
+      const total = userRows.length;
+      const percent = total ? Math.round(doneCount / total * 100) : 0;
+      if(progressSummary) progressSummary.textContent = `${doneCount}/${total}`;
+      if(progressBar) progressBar.style.width = `${percent}%`;
+      if(progressList){
+        const renderGroup = (title, rows, cls, label)=>`
+          <div class="progress-group">
+            <div class="progress-group-title"><span>${title}</span><span>${rows.length} 人</span></div>
+            ${rows.map(row=>`<div class="progress-row"><strong>${escapeHtml(row.displayName || row.name || row.username)}</strong><span class="${cls}">${label}</span></div>`).join("") || '<div class="progress-row"><span>暂无</span><span></span></div>'}
+          </div>`;
+        progressList.innerHTML = total ? `${renderGroup("已提交", doneRows, "done", "已交")}${renderGroup("未提交", missingRows, "missing", "未交")}` : "<span>暂无成员。</span>";
+      }
+    };
+
+    const resetUserForm = ()=>{
+      if(!adminUserForm) return;
+      adminUserForm.reset();
+      const editing = $("[name='editingUsername']", adminUserForm);
+      const username = $("[name='username']", adminUserForm);
+      if(editing) editing.value = "";
+      if(username) username.readOnly = false;
+    };
+
+    const fillUserForm = (username)=>{
+      if(!adminUserForm) return;
+      const profile = (cloudUsers.length ? cloudUsers : defaultUserRows()).find(row=>row.username === username);
+      if(!profile) return;
+      const values = {
+        editingUsername: profile.username,
+        username: profile.username,
+        displayName: profile.displayName || profile.name || "",
+        college: profile.college || "",
+        major: profile.major || "",
+        entryYear: profile.entryYear || "",
+        phone: profile.phone || "",
+        email: profile.email || ""
+      };
+      Object.entries(values).forEach(([key, value])=>{
+        const input = $(`[name="${key}"]`, adminUserForm);
+        if(input) input.value = value;
+      });
+      const usernameInput = $("[name='username']", adminUserForm);
+      if(usernameInput) usernameInput.readOnly = true;
+      adminUserForm.scrollIntoView({behavior:"smooth", block:"center"});
+    };
+
+    const renderUsers = async ()=>{
+      if(!userList) return;
+      const rows = (await getCloudUsers()).filter(row=>row.role !== "admin");
+      if(!rows.length){
+        userList.innerHTML = '<div class="report-empty">暂无成员资料。</div>';
+        return;
+      }
+      const warning = userList.dataset.userError ? `<div class="form-message is-error">云端用户接口暂不可用，当前显示内置默认资料：${escapeHtml(userList.dataset.userError)}</div>` : "";
+      userList.innerHTML = warning + rows.map(row=>`
+        <div class="user-row" data-user-row="${escapeHtml(row.username)}">
+          <div><strong>${escapeHtml(row.username)}</strong>${escapeHtml(row.displayName || row.name || "")}</div>
+          <div>${escapeHtml(row.entryYear || "")}</div>
+          <div>${escapeHtml(row.college || "")}</div>
+          <div>${escapeHtml(row.major || "")}</div>
+          <div>${escapeHtml(row.phone || "")}</div>
+          <div>${escapeHtml(row.email || "")}</div>
+          <div class="user-row-actions">
+            <button class="btn-secondary" data-edit-user="${escapeHtml(row.username)}" type="button">编辑</button>
+            <button class="btn-danger" data-delete-user="${escapeHtml(row.username)}" type="button">删除</button>
+          </div>
+        </div>`).join("");
     };
 
     const renderReports = async ()=>{
@@ -750,6 +963,7 @@
         cachedReports = [];
         if(reportCount) reportCount.textContent = "0";
         updateSelectedCount();
+        updateProgress();
         return;
       }
       try{
@@ -759,15 +973,18 @@
         reportList.innerHTML = `<div class="report-empty">周报列表加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
         if(reportCount) reportCount.textContent = "0";
         updateSelectedCount();
+        updateProgress();
         return;
       }
       if(!cachedReports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
         if(reportCount) reportCount.textContent = "0";
         updateSelectedCount();
+        updateProgress();
         return;
       }
       paintReportList();
+      updateProgress();
     };
 
     root.addEventListener("click", (event)=>{
@@ -775,10 +992,26 @@
       const downloadSelectedButton = event.target.closest("[data-download-selected]");
       const deleteButton = event.target.closest("[data-delete-report]");
       const deleteSelectedButton = event.target.closest("[data-delete-selected]");
+      const editUserButton = event.target.closest("[data-edit-user]");
+      const deleteUserButton = event.target.closest("[data-delete-user]");
+      const resetUserButton = event.target.closest("[data-reset-user-form]");
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
       if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
       if(deleteSelectedButton) deleteReports($$("[data-select-report]:checked", root).map(input=>input.value));
+      if(editUserButton) fillUserForm(editUserButton.dataset.editUser);
+      if(resetUserButton) resetUserForm();
+      if(deleteUserButton){
+        const username = deleteUserButton.dataset.deleteUser;
+        if(window.confirm(`确定删除成员 ${username} 吗？`)){
+          deleteCloudUser(username).then(async ()=>{
+            await renderUsers();
+            await updateProgress();
+          }).catch(error=>{
+            if(userList) userList.insertAdjacentHTML("afterbegin", `<div class="form-message is-error">删除失败：${escapeHtml(error.message || "请检查云端用户接口")}</div>`);
+          });
+        }
+      }
     });
 
     root.addEventListener("change", (event)=>{
@@ -789,6 +1022,39 @@
     root.addEventListener("input", (event)=>{
       if(event.target.closest("[data-filter-name]")) paintReportList();
     });
+
+    if(adminUserForm){
+      adminUserForm.addEventListener("submit", async (event)=>{
+        event.preventDefault();
+        const msg = $("[data-user-message]", adminUserForm);
+        const data = new FormData(adminUserForm);
+        const username = String(data.get("username") || "").trim();
+        const profile = {
+          username,
+          password:"0000",
+          role:"user",
+          displayName:String(data.get("displayName") || "").trim(),
+          college:String(data.get("college") || "").trim(),
+          major:String(data.get("major") || "").trim(),
+          entryYear:String(data.get("entryYear") || "").trim(),
+          phone:String(data.get("phone") || "").trim(),
+          email:String(data.get("email") || "").trim()
+        };
+        if(!profile.username || !profile.displayName){
+          setMessage(msg, "请至少填写学号和姓名。", "error");
+          return;
+        }
+        try{
+          await saveCloudUser(profile);
+          await renderUsers();
+          await updateProgress();
+          resetUserForm();
+          setMessage(msg, "成员资料已保存到云端。", "success");
+        }catch(error){
+          setMessage(msg, `保存失败：${error.message || "请检查云端用户接口"}`, "error");
+        }
+      });
+    }
   };
 
   $$("[data-weekly-report]").forEach(initWeeklyReport);

@@ -12,7 +12,7 @@
 <link href="assets/img/logo.png" rel="icon"/>
 <link href="assets/css/styles.css" rel="stylesheet"/>
 <script>window.AIO4CPS_REPORT_API="https://aio4cps-weekly-api.suzhangsheng1999.workers.dev";</script>
-<script defer="" src="assets/js/main.js?v=20260510-2"></script>
+<script defer="" src="assets/js/main.js?v=20260510-3"></script>
 <noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
 </head>
 <body class="page-weekly-report">
@@ -105,6 +105,7 @@
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-upload">周报提交</a>
+<a href="#my-reports">提交记录</a>
 <a href="#profile-settings">个人信息</a>
 <span>更多模块待接入</span>
 </nav>
@@ -170,6 +171,18 @@
 <p class="form-message" data-upload-message=""></p>
 </form>
 </article>
+<article class="report-panel reveal" id="my-reports">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">提交记录</span>
+<h2>我的历史周报</h2>
+<p>这里显示当前账号已经提交过的周报记录，可在线查看或下载。</p>
+</div>
+</div>
+<div class="user-history-list" data-user-history="">
+<div class="report-empty">登录后加载提交记录。</div>
+</div>
+</article>
 </section>
 </div>
 </div>
@@ -191,8 +204,19 @@
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-admin">周报管理</a>
+<a href="#user-admin">成员资料</a>
 <span>更多模块待接入</span>
 </nav>
+<div class="weekly-progress-card" data-progress-card="">
+<div class="weekly-progress-head">
+<span>本周提交进度</span>
+<strong data-progress-summary="">0/0</strong>
+</div>
+<div class="weekly-progress-bar"><span data-progress-bar="" style="width:0%"></span></div>
+<div class="weekly-progress-list" data-progress-list="">
+<span>登录后加载进度。</span>
+</div>
+</div>
 </aside>
 <section class="affairs-main" id="weekly-admin">
 <div class="report-dashboard">
@@ -230,6 +254,49 @@
 </div>
 <div class="report-list" data-report-list="">
 <div class="report-empty">暂无周报记录。</div>
+</div>
+</article>
+<article class="report-panel reveal" id="user-admin">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">成员资料</span>
+<h2>用户信息管理</h2>
+<p>成员资料保存在云端数据库中，和周报文件一样可跨设备使用。</p>
+</div>
+</div>
+<form class="admin-user-form" data-admin-user-form="">
+<input name="editingUsername" type="hidden"/>
+<div class="admin-user-grid">
+<label class="filter-field">学号
+<input class="form-input" name="username" placeholder="学号" required="" type="text"/>
+</label>
+<label class="filter-field">姓名
+<input class="form-input" name="displayName" placeholder="姓名" required="" type="text"/>
+</label>
+<label class="filter-field">学院
+<input class="form-input" name="college" placeholder="学院" type="text"/>
+</label>
+<label class="filter-field">专业
+<input class="form-input" name="major" placeholder="专业" type="text"/>
+</label>
+<label class="filter-field">入学年
+<input class="form-input" name="entryYear" placeholder="入学年" type="text"/>
+</label>
+<label class="filter-field">手机号
+<input class="form-input" name="phone" placeholder="手机号" type="tel"/>
+</label>
+<label class="filter-field">邮箱
+<input class="form-input" name="email" placeholder="邮箱" type="email"/>
+</label>
+<div class="admin-user-actions">
+<button class="btn-primary" type="submit">保存用户</button>
+<button class="btn-secondary" data-reset-user-form="" type="button">清空</button>
+</div>
+</div>
+<p class="form-message" data-user-message=""></p>
+</form>
+<div class="user-list" data-user-list="">
+<div class="report-empty">正在加载成员资料。</div>
 </div>
 </article>
 </section>
