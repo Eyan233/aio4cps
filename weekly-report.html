@@ -12,7 +12,7 @@
 <link href="assets/img/logo.png" rel="icon"/>
 <link href="assets/css/styles.css" rel="stylesheet"/>
 <script>window.AIO4CPS_REPORT_API="https://aio4cps-weekly-api.suzhangsheng1999.workers.dev";</script>
-<script defer="" src="assets/js/main.js?v=20260510-3"></script>
+<script defer="" src="assets/js/main.js?v=20260511-1"></script>
 <noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
 </head>
 <body class="page-weekly-report">
@@ -106,6 +106,7 @@
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-upload">周报提交</a>
 <a href="#my-reports">提交记录</a>
+<a href="#material-downloads">资料下载</a>
 <a href="#profile-settings">个人信息</a>
 <span>更多模块待接入</span>
 </nav>
@@ -183,6 +184,18 @@
 <div class="report-empty">登录后加载提交记录。</div>
 </div>
 </article>
+<article class="report-panel reveal" id="material-downloads">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">课题组资料</span>
+<h2>资料下载</h2>
+<p>管理员上传的课题组资料会按分类显示，成员可直接下载。</p>
+</div>
+</div>
+<div class="material-list" data-user-materials="">
+<div class="report-empty">正在加载资料。</div>
+</div>
+</article>
 </section>
 </div>
 </div>
@@ -205,6 +218,7 @@
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-admin">周报管理</a>
 <a href="#user-admin">成员资料</a>
+<a href="#material-admin">资料管理</a>
 <span>更多模块待接入</span>
 </nav>
 <div class="weekly-progress-card" data-progress-card="">
@@ -232,7 +246,9 @@
 </div>
 <div class="report-toolbar">
 <label class="filter-field">姓名
-<input class="form-input" data-filter-name="" placeholder="输入姓名/学号" type="search"/>
+<select class="form-input" data-filter-name="">
+<option value="">全部成员</option>
+</select>
 </label>
 <label class="filter-field">周次
 <select class="form-input" data-filter-week="">
@@ -297,6 +313,33 @@
 </form>
 <div class="user-list" data-user-list="">
 <div class="report-empty">正在加载成员资料。</div>
+</div>
+</article>
+<article class="report-panel reveal" id="material-admin">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">课题组资料</span>
+<h2>资料管理</h2>
+<p>上传常用资料并设置分类，成员端可按分类下载。</p>
+</div>
+</div>
+<form class="material-form" data-material-form="">
+<div class="material-form-grid">
+<label class="filter-field">分类
+<input class="form-input" name="category" placeholder="如：模板 / 培训 / 论文资料" required="" type="text"/>
+</label>
+<label class="filter-field">资料名称
+<input class="form-input" name="title" placeholder="默认使用文件名" type="text"/>
+</label>
+<label class="filter-field material-file-field">文件
+<input class="form-input report-file-input" name="file" required="" type="file"/>
+</label>
+<button class="btn-primary" type="submit">上传资料</button>
+</div>
+<p class="form-message" data-material-message=""></p>
+</form>
+<div class="material-list" data-admin-materials="">
+<div class="report-empty">正在加载资料。</div>
 </div>
 </article>
 </section>

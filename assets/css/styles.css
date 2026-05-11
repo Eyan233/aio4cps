@@ -269,6 +269,17 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .user-row strong{display:block;color:var(--text);font-size:15px}
 .user-row-actions{display:flex;justify-content:flex-end;gap:7px;white-space:nowrap}
 .user-row-actions .btn-secondary,.user-row-actions .btn-danger{padding:8px 10px;border-radius:8px;font-size:13px}
+.material-form{margin-bottom:16px}
+.material-form-grid{display:grid;grid-template-columns:minmax(150px,.6fr) minmax(190px,.8fr) minmax(240px,1fr) auto;gap:10px;align-items:end}
+.material-file-field{min-width:220px}
+.material-list{display:grid;gap:12px}
+.material-category{display:grid;gap:8px}
+.material-category-title{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font-weight:900}
+.material-category-title span{color:var(--muted);font-size:13px;font-weight:800}
+.material-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(120px,.5fr) minmax(150px,.6fr) auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #d8e5f2;border-radius:8px;background:#fbfdff;color:var(--muted);font-size:14px}
+.material-row strong{display:block;color:var(--text);font-size:15px}
+.material-actions{display:flex;justify-content:flex-end;gap:7px;white-space:nowrap}
+.material-actions .btn-primary,.material-actions .btn-danger{padding:8px 10px;border-radius:8px;font-size:13px}
 .btn-danger{display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(180,35,24,.18);background:#fff;color:#b42318;font-weight:800;transition:.2s ease}
 .btn-danger:hover{background:#fff3f1;border-color:rgba(180,35,24,.28)}
 .report-panel{padding:24px}
@@ -293,9 +304,10 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .intro-shell,.home-overview-grid,.mentor-card-modern,.cooperation-cta,.report-admin-grid,.affairs-login-layout,.affairs-shell{grid-template-columns:1fr}
   .affairs-sidebar{position:static}
   .report-table-head{display:none}
-  .report-item,.user-row{grid-template-columns:1fr}
-  .report-item-actions,.user-row-actions{justify-content:flex-start;flex-wrap:wrap}
+  .report-item,.user-row,.material-row{grid-template-columns:1fr}
+  .report-item-actions,.user-row-actions,.material-actions{justify-content:flex-start;flex-wrap:wrap}
   .admin-user-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .material-form-grid{grid-template-columns:1fr 1fr}
   .mentor-card-photo{padding:0 28px 28px}
   .cooperation-cta-action{justify-content:flex-start}
 }
@@ -319,6 +331,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .affairs-appbar{grid-template-columns:1fr;display:grid}
   .profile-grid{grid-template-columns:1fr;gap:8px}
   .profile-actions{justify-content:flex-start}
+  .material-form-grid{grid-template-columns:1fr}
   .page-weekly-report .container{max-width:100%;padding:0 16px}
 }
 

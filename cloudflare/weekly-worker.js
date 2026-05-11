@@ -60,6 +60,19 @@ async function ensureTables(env) {
       uploaded_at TEXT NOT NULL
     )
   `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS materials (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_type TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      r2_key TEXT NOT NULL,
+      uploaded_at TEXT NOT NULL
+    )
+  `).run();
 }
 
 async function listUsers(env) {
@@ -198,6 +211,62 @@ async function deleteReport(env, id) {
   return json({ ok: true });
 }
 
+async function listMaterials(request, env) {
+  const url = new URL(request.url);
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM materials ORDER BY category ASC, uploaded_at DESC"
+  ).all();
+
+  return json({
+    materials: results.map((r) => ({
+      id: r.id,
+      category: r.category,
+      title: r.title,
+      fileName: r.file_name,
+      fileType: r.file_type,
+      fileSize: r.file_size,
+      uploadedAt: r.uploaded_at,
+      url: `${url.origin}/material-files/${encodeURIComponent(r.id)}`,
+      downloadUrl: `${url.origin}/material-files/${encodeURIComponent(r.id)}`,
+    })),
+  });
+}
+
+async function saveMaterial(request, env) {
+  const form = await request.formData();
+  const file = form.get("file");
+  if (!(file instanceof File)) return json({ error: "Missing file" }, 400);
+
+  const category = String(form.get("category") || "").trim();
+  const title = String(form.get("title") || file.name).trim();
+  if (!category || !title) return json({ error: "Missing category or title" }, 400);
+
+  const id = crypto.randomUUID();
+  const fileName = safeName(file.name);
+  const fileType = file.type || "application/octet-stream";
+  const r2Key = `materials/${safeName(category)}/${Date.now()}-${fileName}`;
+  const uploadedAt = new Date().toISOString();
+
+  await env.REPORT_BUCKET.put(r2Key, file.stream(), {
+    httpMetadata: { contentType: fileType },
+  });
+
+  await env.DB.prepare(`
+    INSERT INTO materials
+      (id, category, title, file_name, file_type, file_size, r2_key, uploaded_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(id, category, title, fileName, fileType, file.size, r2Key, uploadedAt).run();
+
+  return json({ ok: true, id });
+}
+
+async function deleteMaterial(env, id) {
+  const old = await env.DB.prepare("SELECT r2_key FROM materials WHERE id = ?").bind(id).first();
+  if (old?.r2_key) await env.REPORT_BUCKET.delete(old.r2_key);
+  await env.DB.prepare("DELETE FROM materials WHERE id = ?").bind(id).run();
+  return json({ ok: true });
+}
+
 async function serveStoredFile(env, id, pdfOnly) {
   const row = await env.DB.prepare("SELECT * FROM reports WHERE id = ?").bind(id).first();
   if (!row) return json({ error: "Not found" }, 404);
@@ -215,6 +284,19 @@ async function serveStoredFile(env, id, pdfOnly) {
     `${pdfOnly ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(row.file_name)}`
   );
 
+  return new Response(object.body, { headers });
+}
+
+async function serveMaterialFile(env, id) {
+  const row = await env.DB.prepare("SELECT * FROM materials WHERE id = ?").bind(id).first();
+  if (!row) return json({ error: "Not found" }, 404);
+
+  const object = await env.REPORT_BUCKET.get(row.r2_key);
+  if (!object) return json({ error: "File not found" }, 404);
+
+  const headers = new Headers(CORS);
+  headers.set("Content-Type", row.file_type || "application/octet-stream");
+  headers.set("Content-Disposition", `attachment; filename*=UTF-8''${encodeURIComponent(row.file_name)}`);
   return new Response(object.body, { headers });
 }
 
@@ -242,6 +324,14 @@ export default {
       }
       if (request.method === "DELETE" && path.startsWith("/reports/")) {
         return deleteReport(env, decodeURIComponent(path.replace("/reports/", "")));
+      }
+      if (request.method === "GET" && path === "/materials") return listMaterials(request, env);
+      if (request.method === "POST" && path === "/materials") return saveMaterial(request, env);
+      if (request.method === "DELETE" && path.startsWith("/materials/")) {
+        return deleteMaterial(env, decodeURIComponent(path.replace("/materials/", "")));
+      }
+      if (request.method === "GET" && path.startsWith("/material-files/")) {
+        return serveMaterialFile(env, decodeURIComponent(path.replace("/material-files/", "")));
       }
       return json({ error: "Not found" }, 404);
     } catch (error) {

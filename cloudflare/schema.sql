@@ -24,6 +24,17 @@ CREATE TABLE IF NOT EXISTS reports (
   uploaded_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS materials (
+  id TEXT PRIMARY KEY,
+  category TEXT NOT NULL,
+  title TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  file_type TEXT NOT NULL,
+  file_size INTEGER NOT NULL,
+  r2_key TEXT NOT NULL,
+  uploaded_at TEXT NOT NULL
+);
+
 INSERT OR REPLACE INTO users (username, password, role, display_name, college, major, entry_year, phone, email, updated_at) VALUES
 ('20240901072', '0000', 'user', '苏章圣', '材料科学与工程', '冶金工程', '2024', '15987963968', '1253296002@qq.com', datetime('now')),
 ('202513021024', '0000', 'user', '皮景升', '自动化学院', '控制科学与工程', '2025', '19562171350', '3137165096@qq.com', datetime('now')),

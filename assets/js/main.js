@@ -271,6 +271,9 @@
     const profileForm = $("[data-profile-form]", root);
     const reportList = $("[data-report-list]", root);
     const userHistory = $("[data-user-history]", root);
+    const userMaterials = $("[data-user-materials]", root);
+    const adminMaterials = $("[data-admin-materials]", root);
+    const materialForm = $("[data-material-form]", root);
     const preview = $("[data-report-preview]", root);
     const reportCount = $("[data-report-count]", root);
     const selectedCount = $("[data-selected-count]", root);
@@ -343,6 +346,25 @@
 
     const deleteReport = async (id)=>requestJson(`/reports/${encodeURIComponent(id)}`, {method:"DELETE"});
 
+    const getMaterials = async ()=>{
+      if(!reportApiBase) return [];
+      const data = await requestJson("/materials");
+      return Array.isArray(data) ? data : (data.materials || []);
+    };
+
+    const saveMaterial = async ({category, title, file})=>{
+      ensureReportApi();
+      const formData = new FormData();
+      formData.append("category", category);
+      formData.append("title", title);
+      formData.append("file", file);
+      const response = await fetch(apiUrl("/materials"), {method:"POST", body:formData});
+      if(!response.ok) throw new Error(`上传失败：${response.status}`);
+      return response.json();
+    };
+
+    const deleteMaterial = async (id)=>requestJson(`/materials/${encodeURIComponent(id)}`, {method:"DELETE"});
+
     const normalizeUser = (username, profile={})=>({
       username,
       password: profile.password || "0000",
@@ -371,6 +393,7 @@
         cloudUsers = defaultUserRows();
         if(userList) userList.dataset.userError = error.message || "用户接口不可用";
       }
+      populateUserFilter();
       return cloudUsers.length ? cloudUsers : defaultUserRows();
     };
 
@@ -431,6 +454,17 @@
     const getDisplayName = (username)=>{
       const profile = getProfile(username);
       return profile.displayName || profile.name || username;
+    };
+
+    const populateUserFilter = ()=>{
+      if(!filterName || filterName.tagName !== "SELECT") return;
+      const rows = (cloudUsers.length ? cloudUsers : defaultUserRows()).filter(row=>row.role !== "admin");
+      const current = filterName.value;
+      filterName.innerHTML = '<option value="">全部成员</option>' + rows.map(row=>{
+        const label = `${row.displayName || row.name || row.username}（${row.username}）`;
+        return `<option value="${escapeHtml(row.username)}">${escapeHtml(label)}</option>`;
+      }).join("");
+      filterName.value = rows.some(row=>row.username === current) ? current : "";
     };
 
     const updateCurrentUserText = ()=>{
@@ -496,10 +530,14 @@
         });
       }
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
-      if(role === "user") renderUserHistory();
+      if(role === "user"){
+        renderUserHistory();
+        renderMaterials("user");
+      }
       if(role === "admin"){
         renderReports();
         renderUsers();
+        renderMaterials("admin");
       }
       window.scrollTo({top:0, behavior:"smooth"});
     };
@@ -765,8 +803,9 @@
       const weekValue = filterWeek ? filterWeek.value : "";
       return cachedReports.filter(report=>{
         const nameText = `${report.name || ""} ${report.username || ""}`.toLowerCase();
+        const selectedUser = String(report.username || "").toLowerCase();
         const weekText = String(report.week || "");
-        const matchesName = !nameValue || nameText.includes(nameValue);
+        const matchesName = !nameValue || selectedUser === nameValue || nameText.includes(nameValue);
         const matchesWeek = !weekValue || weekText.includes(weekValue);
         return matchesName && matchesWeek;
       });
@@ -874,6 +913,46 @@
           ${reports.map(report=>reportRowHtml(report, false)).join("")}`;
       }catch(error){
         userHistory.innerHTML = `<div class="report-empty">提交记录加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
+      }
+    };
+
+    const materialRowHtml = (item, admin=false)=>`
+      <div class="material-row" data-material-id="${escapeHtml(item.id)}">
+        <div><strong>${escapeHtml(item.title || item.fileName || "未命名资料")}</strong>${escapeHtml(item.fileName || "")}</div>
+        <div>${formatSize(item.fileSize || 0)}</div>
+        <div>${new Date(item.uploadedAt).toLocaleString("zh-CN", {hour12:false})}</div>
+        <div class="material-actions">
+          <a class="btn-primary" href="${escapeHtml(item.downloadUrl || item.url || "")}" rel="noopener" target="_blank">下载</a>
+          ${admin ? `<button class="btn-danger" data-delete-material="${escapeHtml(item.id)}" type="button">删除</button>` : ""}
+        </div>
+      </div>`;
+
+    const renderMaterials = async (targetRole)=>{
+      const target = targetRole === "admin" ? adminMaterials : userMaterials;
+      if(!target) return;
+      if(!reportApiBase){
+        target.innerHTML = '<div class="report-empty">尚未配置资料存储接口。</div>';
+        return;
+      }
+      try{
+        const materials = await getMaterials();
+        if(!materials.length){
+          target.innerHTML = '<div class="report-empty">暂无课题组资料。</div>';
+          return;
+        }
+        const groups = new Map();
+        materials.forEach(item=>{
+          const category = item.category || "未分类";
+          if(!groups.has(category)) groups.set(category, []);
+          groups.get(category).push(item);
+        });
+        target.innerHTML = Array.from(groups.entries()).map(([category, items])=>`
+          <div class="material-category">
+            <div class="material-category-title"><strong>${escapeHtml(category)}</strong><span>${items.length} 个文件</span></div>
+            ${items.map(item=>materialRowHtml(item, targetRole === "admin")).join("")}
+          </div>`).join("");
+      }catch(error){
+        target.innerHTML = `<div class="report-empty">资料加载失败：${escapeHtml(error.message || "请检查云端资料接口")}</div>`;
       }
     };
 
@@ -995,6 +1074,7 @@
       const editUserButton = event.target.closest("[data-edit-user]");
       const deleteUserButton = event.target.closest("[data-delete-user]");
       const resetUserButton = event.target.closest("[data-reset-user-form]");
+      const deleteMaterialButton = event.target.closest("[data-delete-material]");
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
       if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
@@ -1012,16 +1092,53 @@
           });
         }
       }
+      if(deleteMaterialButton){
+        const id = deleteMaterialButton.dataset.deleteMaterial;
+        if(window.confirm("确定删除这份课题组资料吗？")){
+          deleteMaterial(id).then(async ()=>{
+            await renderMaterials("admin");
+            await renderMaterials("user");
+          }).catch(error=>{
+            if(adminMaterials) adminMaterials.insertAdjacentHTML("afterbegin", `<div class="form-message is-error">删除失败：${escapeHtml(error.message || "请检查云端资料接口")}</div>`);
+          });
+        }
+      }
     });
 
     root.addEventListener("change", (event)=>{
       if(event.target.closest("[data-select-report]")) updateSelectedCount();
       if(event.target.closest("[data-filter-week]")) paintReportList();
+      if(event.target.closest("[data-filter-name]")) paintReportList();
     });
 
     root.addEventListener("input", (event)=>{
       if(event.target.closest("[data-filter-name]")) paintReportList();
     });
+
+    if(materialForm){
+      materialForm.addEventListener("submit", async (event)=>{
+        event.preventDefault();
+        const msg = $("[data-material-message]", materialForm);
+        const formData = new FormData(materialForm);
+        const category = String(formData.get("category") || "").trim();
+        const file = formData.get("file");
+        const title = String(formData.get("title") || "").trim() || (file instanceof File ? file.name : "");
+        if(!category || !(file instanceof File) || !file.name){
+          setMessage(msg, "请填写分类并选择文件。", "error");
+          return;
+        }
+        try{
+          setMessage(msg, "正在上传资料...", "");
+          await saveMaterial({category, title, file});
+          materialForm.reset();
+          setMessage(msg, "资料已上传。", "success");
+          await renderMaterials("admin");
+          await renderMaterials("user");
+        }catch(error){
+          setMessage(msg, error.message || "资料上传失败，请检查云端接口。", "error");
+        }
+      });
+    }
 
     if(adminUserForm){
       adminUserForm.addEventListener("submit", async (event)=>{
