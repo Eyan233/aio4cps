@@ -549,6 +549,12 @@
       return Array.from(latest.values()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
     };
 
+    const getCurrentWeekReports = ()=>cachedReports.filter(report=>String(report.week || "").includes(currentWeekInfo.shortLabel));
+
+    const updateCurrentWeekReportCount = ()=>{
+      if(reportCount) reportCount.textContent = String(getCurrentWeekReports().length);
+    };
+
     const showPanel = async (account)=>{
       currentUser = account;
       const role = account.role;
@@ -864,11 +870,11 @@
       const reports = getFilteredReports();
       if(!reports.length){
         reportList.innerHTML = '<div class="report-empty">没有符合条件的周报。</div>';
-        if(reportCount) reportCount.textContent = String(cachedReports.length);
+        updateCurrentWeekReportCount();
         updateSelectedCount();
         return;
       }
-      if(reportCount) reportCount.textContent = String(cachedReports.length);
+      updateCurrentWeekReportCount();
       const rowsHtml = reports.map(report=>{
         const uploaded = new Date(report.uploadedAt).toLocaleString("zh-CN", {hour12:false});
         const lowerName = String(report.fileName || "").toLowerCase();
@@ -1008,14 +1014,14 @@
       const rows = await getCloudUsers();
       const userRows = rows.filter(row=>row.role !== "admin");
       const currentWeek = currentWeekInfo.shortLabel;
-      const submitted = new Set(cachedReports
-        .filter(report=>String(report.week || "").includes(currentWeek))
-        .map(report=>report.username || report.name));
+      const currentReports = cachedReports.filter(report=>String(report.week || "").includes(currentWeek));
+      const submitted = new Set(currentReports.map(report=>report.username || report.name));
       const doneRows = userRows.filter(row=>submitted.has(row.username) || submitted.has(row.displayName) || submitted.has(row.name));
       const missingRows = userRows.filter(row=>!submitted.has(row.username) && !submitted.has(row.displayName) && !submitted.has(row.name));
       const doneCount = doneRows.length;
       const total = userRows.length;
       const percent = total ? Math.round(doneCount / total * 100) : 0;
+      if(reportCount) reportCount.textContent = String(currentReports.length);
       if(progressSummary) progressSummary.textContent = `${doneCount}/${total}`;
       if(progressBar) progressBar.style.width = `${percent}%`;
       if(progressList){
@@ -1088,7 +1094,7 @@
       if(!reportApiBase){
         reportList.innerHTML = '<div class="report-empty">尚未配置服务器存储接口。GitHub Pages 静态页面不能直接保存跨设备上传文件。</div>';
         cachedReports = [];
-        if(reportCount) reportCount.textContent = "0";
+        updateCurrentWeekReportCount();
         updateSelectedCount();
         updateProgress();
         return;
@@ -1098,14 +1104,14 @@
       }catch(error){
         cachedReports = [];
         reportList.innerHTML = `<div class="report-empty">周报列表加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
-        if(reportCount) reportCount.textContent = "0";
+        updateCurrentWeekReportCount();
         updateSelectedCount();
         updateProgress();
         return;
       }
       if(!cachedReports.length){
         reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
-        if(reportCount) reportCount.textContent = "0";
+        updateCurrentWeekReportCount();
         updateSelectedCount();
         updateProgress();
         return;
