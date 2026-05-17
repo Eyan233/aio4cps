@@ -12,7 +12,7 @@
 <link href="assets/img/logo.png" rel="icon"/>
 <link href="assets/css/styles.css" rel="stylesheet"/>
 <script>window.AIO4CPS_REPORT_API="https://aio4cps-weekly-api.suzhangsheng1999.workers.dev";</script>
-<script defer="" src="assets/js/main.js?v=20260511-1"></script>
+<script defer="" src="assets/js/main.js?v=20260517-1"></script>
 <noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
 </head>
 <body class="page-weekly-report">
@@ -70,7 +70,7 @@
 <aside class="affairs-module-card">
 <span class="section-chip">模块</span>
 <h2>周报提交</h2>
-<p>当前周编号为第 1 周：2026/5/4 - 2026/5/10。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。</p>
+<p data-current-week-text="">当前周次将根据日期自动更新。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。</p>
 <div class="affairs-module-list">
 <span class="active">周报提交</span>
 <span>更多事务模块待接入</span>
@@ -155,7 +155,7 @@
 <label class="form-label" for="reportName">提交账号</label>
 <input class="form-input" id="reportName" name="name" readonly="" required="" type="text"/>
 <label class="form-label" for="reportWeek">周次</label>
-<select class="form-input" id="reportWeek" name="week" required="">
+<select class="form-input" data-week-select="" id="reportWeek" name="week" required="">
 <option selected="" value="第1周：2026/5/4 - 2026/5/10">第1周：2026/5/4 - 2026/5/10</option>
 <option value="第2周：2026/5/11 - 2026/5/17">第2周：2026/5/11 - 2026/5/17</option>
 <option value="第3周：2026/5/18 - 2026/5/24">第3周：2026/5/18 - 2026/5/24</option>
@@ -236,7 +236,7 @@
 <div class="report-dashboard">
 <article class="metric-card"><span>当前模块</span><strong>周报</strong></article>
 <article class="metric-card"><span>已提交</span><strong data-report-count="">0</strong></article>
-<article class="metric-card"><span>当前周次</span><strong class="metric-small">第1周</strong></article>
+<article class="metric-card"><span>当前周次</span><strong class="metric-small" data-current-week-label="">第1周</strong></article>
 </div>
 <article class="report-panel reveal">
 <div class="report-panel-head">
@@ -251,7 +251,7 @@
 </select>
 </label>
 <label class="filter-field">周次
-<select class="form-input" data-filter-week="">
+<select class="form-input" data-filter-week="" data-week-filter="">
 <option value="">全部周次</option>
 <option value="第1周">第1周</option>
 <option value="第2周">第2周</option>

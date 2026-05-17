@@ -280,6 +280,10 @@
     const uploadMask = $("[data-upload-mask]", root);
     const filterName = $("[data-filter-name]", root);
     const filterWeek = $("[data-filter-week]", root);
+    const weekSelect = $("[data-week-select]", root);
+    const weekFilter = $("[data-week-filter]", root);
+    const currentWeekText = $("[data-current-week-text]", root);
+    const currentWeekLabels = $$("[data-current-week-label]", root);
     const progressSummary = $("[data-progress-summary]", root);
     const progressBar = $("[data-progress-bar]", root);
     const progressList = $("[data-progress-list]", root);
@@ -289,6 +293,48 @@
     let currentUser = null;
     let cachedReports = [];
     let cloudUsers = [];
+    const weekBase = new Date(2026, 4, 4);
+    const msPerDay = 24 * 60 * 60 * 1000;
+
+    const addDays = (date, days)=>{
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    };
+
+    const formatWeekDate = (date)=>`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+
+    const getCurrentWeekNumber = (date=new Date())=>{
+      const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diffDays = Math.floor((today - weekBase) / msPerDay);
+      return Math.max(1, Math.floor(diffDays / 7) + 1);
+    };
+
+    const getWeekInfo = (weekNumber)=>{
+      const start = addDays(weekBase, (weekNumber - 1) * 7);
+      const end = addDays(start, 6);
+      const shortLabel = `第${weekNumber}周`;
+      const label = `${shortLabel}：${formatWeekDate(start)} - ${formatWeekDate(end)}`;
+      return {weekNumber, start, end, shortLabel, label};
+    };
+
+    const currentWeekInfo = getWeekInfo(getCurrentWeekNumber());
+
+    const syncWeekUi = ()=>{
+      const optionCount = Math.max(12, currentWeekInfo.weekNumber + 6);
+      const weekOptions = Array.from({length:optionCount}, (_, index)=>getWeekInfo(index + 1));
+      if(weekSelect){
+        weekSelect.innerHTML = weekOptions.map(info=>`<option value="${escapeHtml(info.label)}">${escapeHtml(info.label)}</option>`).join("");
+        weekSelect.value = currentWeekInfo.label;
+      }
+      if(weekFilter){
+        weekFilter.innerHTML = '<option value="">全部周次</option>' + weekOptions.map(info=>`<option value="${escapeHtml(info.shortLabel)}">${escapeHtml(info.shortLabel)}</option>`).join("");
+      }
+      if(currentWeekText){
+        currentWeekText.textContent = `当前周编号为${currentWeekInfo.shortLabel}：${formatWeekDate(currentWeekInfo.start)} - ${formatWeekDate(currentWeekInfo.end)}。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。`;
+      }
+      currentWeekLabels.forEach(el=>{ el.textContent = currentWeekInfo.shortLabel; });
+    };
 
     const setMessage = (el, text, type)=>{
       if(!el) return;
@@ -434,6 +480,8 @@
       '"':"&quot;",
       "'":"&#39;"
     }[char]));
+
+    syncWeekUi();
 
     const profileKey = (username)=>`aio4cps-profile-${username}`;
 
@@ -644,7 +692,7 @@
           const reportName = $("#reportName", uploadForm);
           if(reportName && currentUser) reportName.value = getDisplayName(currentUser.username);
           const weekSelect = $("#reportWeek", uploadForm);
-          if(weekSelect) weekSelect.selectedIndex = 0;
+          if(weekSelect) weekSelect.value = currentWeekInfo.label;
           setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
           await renderUserHistory();
         }catch(error){
@@ -959,7 +1007,7 @@
     const updateProgress = async ()=>{
       const rows = await getCloudUsers();
       const userRows = rows.filter(row=>row.role !== "admin");
-      const currentWeek = "第1周";
+      const currentWeek = currentWeekInfo.shortLabel;
       const submitted = new Set(cachedReports
         .filter(report=>String(report.week || "").includes(currentWeek))
         .map(report=>report.username || report.name));
