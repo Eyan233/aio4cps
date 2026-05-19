@@ -44,4 +44,4 @@ INSERT OR REPLACE INTO users (username, password, role, display_name, college, m
 ('202513131180', '0000', 'user', '张富均', '自动化学院', '电子信息', '2025', '15923858308', '15923858308@163.com', datetime('now')),
 ('202409131254', '0000', 'user', '罗庆暄', '材料科学与工程', '材料与化工', '2024', '17783598675', '709235262@qq.com', datetime('now')),
 ('202413021006', '0000', 'user', '刘涛', '自动化学院', '控制科学与工程', '2024', '19855816903', '19855816903@163.com', datetime('now')),
-('admin', 'admin', 'admin', 'admin', '', '', '', '', '', datetime('now'));
+('admin', 'admin@aio4cps', 'admin', 'admin', '', '', '', '', '', datetime('now'));

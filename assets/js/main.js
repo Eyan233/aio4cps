@@ -1185,12 +1185,17 @@
       const deleteUserButton = event.target.closest("[data-delete-user]");
       const resetUserButton = event.target.closest("[data-reset-user-form]");
       const deleteMaterialButton = event.target.closest("[data-delete-material]");
+      const togglePasswordButton = event.target.closest("[data-toggle-password]");
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
       if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
       if(deleteSelectedButton) deleteReports($$("[data-select-report]:checked", root).map(input=>input.value));
       if(editUserButton) fillUserForm(editUserButton.dataset.editUser);
       if(resetUserButton) resetUserForm();
+      if(togglePasswordButton){
+        const panel = $("[data-admin-password-panel]", root);
+        if(panel) panel.hidden = !panel.hidden;
+      }
       if(deleteUserButton){
         const username = deleteUserButton.dataset.deleteUser;
         if(window.confirm(`确定删除成员 ${username} 吗？`)){

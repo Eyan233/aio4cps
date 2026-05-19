@@ -73,6 +73,22 @@ async function ensureTables(env) {
       uploaded_at TEXT NOT NULL
     )
   `).run();
+
+  await env.DB.prepare(`
+    INSERT INTO users
+      (username, password, role, display_name, college, major, entry_year, phone, email, updated_at)
+    VALUES ('admin', 'admin@aio4cps', 'admin', 'admin', '', '', '', '', '', ?)
+    ON CONFLICT(username) DO UPDATE SET
+      password = CASE
+        WHEN users.password = 'admin' THEN excluded.password
+        ELSE users.password
+      END,
+      role = 'admin',
+      updated_at = CASE
+        WHEN users.password = 'admin' THEN excluded.updated_at
+        ELSE users.updated_at
+      END
+  `).bind(new Date().toISOString()).run();
 }
 
 async function listUsers(env) {

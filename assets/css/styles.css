@@ -233,6 +233,9 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
 .affairs-appbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;padding:20px 24px}
 .affairs-appbar h1{margin:8px 0 0;font-size:28px;line-height:1.2}
 .affairs-appbar p{margin:6px 0 0;color:var(--muted);font-weight:700}
+.affairs-appbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.admin-password-panel{max-width:none;margin:-6px 0 18px;padding:18px 24px;background:#fff;border:1px solid #d7e6f5;border-radius:8px;box-shadow:0 14px 34px rgba(25,61,98,.07)}
+.admin-password-panel[hidden]{display:none}
 .affairs-shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
 .affairs-sidebar{position:sticky;top:92px;display:grid;gap:20px}
 .affairs-side-nav{display:grid;gap:10px}
@@ -329,6 +332,7 @@ svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-l
   .affairs-module-card,.affairs-login-card,.affairs-sidebar,.report-panel{padding:20px}
   .report-dashboard{grid-template-columns:1fr}
   .affairs-appbar{grid-template-columns:1fr;display:grid}
+  .affairs-appbar-actions{justify-content:flex-start}
   .profile-grid{grid-template-columns:1fr;gap:8px}
   .profile-actions{justify-content:flex-start}
   .material-form-grid{grid-template-columns:1fr}
