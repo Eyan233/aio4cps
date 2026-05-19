@@ -254,21 +254,22 @@
 
   const initWeeklyReport = (root)=>{
     const users = {
-      "20240901072": {password:"0000", role:"user", name:"苏章圣", college:"材料科学与工程", major:"冶金工程", entryYear:"2024", phone:"15987963968", email:"1253296002@qq.com"},
-      "202513021024": {password:"0000", role:"user", name:"皮景升", college:"自动化学院", major:"控制科学与工程", entryYear:"2025", phone:"19562171350", email:"3137165096@qq.com"},
-      "202309021299": {password:"0000", role:"user", name:"孙禄冰", college:"材料科学与工程", major:"冶金工程", entryYear:"2023", phone:"13062320535", email:"1255996389@qq.com"},
-      "202513131209": {password:"0000", role:"user", name:"蒋卓隽", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"13629647969", email:"2515193390@qq.com"},
-      "202513131162": {password:"0000", role:"user", name:"陈佳玲", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"17775609276", email:"2985078918@qq.com"},
-      "202513131180": {password:"0000", role:"user", name:"张富均", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"15923858308", email:"15923858308@163.com"},
-      "202409131254": {password:"0000", role:"user", name:"罗庆暄", college:"材料科学与工程", major:"材料与化工", entryYear:"2024", phone:"17783598675", email:"709235262@qq.com"},
-      "202413021006": {password:"0000", role:"user", name:"刘涛", college:"自动化学院", major:"控制科学与工程", entryYear:"2024", phone:"19855816903", email:"19855816903@163.com"},
-      "admin": {password:"admin", role:"admin"}
+      "20240901072": {role:"user", name:"苏章圣", college:"材料科学与工程", major:"冶金工程", entryYear:"2024", phone:"15987963968", email:"1253296002@qq.com"},
+      "202513021024": {role:"user", name:"皮景升", college:"自动化学院", major:"控制科学与工程", entryYear:"2025", phone:"19562171350", email:"3137165096@qq.com"},
+      "202309021299": {role:"user", name:"孙禄冰", college:"材料科学与工程", major:"冶金工程", entryYear:"2023", phone:"13062320535", email:"1255996389@qq.com"},
+      "202513131209": {role:"user", name:"蒋卓隽", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"13629647969", email:"2515193390@qq.com"},
+      "202513131162": {role:"user", name:"陈佳玲", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"17775609276", email:"2985078918@qq.com"},
+      "202513131180": {role:"user", name:"张富均", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"15923858308", email:"15923858308@163.com"},
+      "202409131254": {role:"user", name:"罗庆暄", college:"材料科学与工程", major:"材料与化工", entryYear:"2024", phone:"17783598675", email:"709235262@qq.com"},
+      "202413021006": {role:"user", name:"刘涛", college:"自动化学院", major:"控制科学与工程", entryYear:"2024", phone:"19855816903", email:"19855816903@163.com"},
+      "admin": {role:"admin"}
     };
     const gate = $("[data-report-gate]", root);
     const userPanel = $("[data-user-panel]", root);
     const adminPanel = $("[data-admin-panel]", root);
     const uploadForm = $("[data-upload-form]", root);
     const profileForm = $("[data-profile-form]", root);
+    const passwordForm = $("[data-password-form]", root);
     const reportList = $("[data-report-list]", root);
     const userHistory = $("[data-user-history]", root);
     const userMaterials = $("[data-user-materials]", root);
@@ -363,10 +364,11 @@
     const requestJson = async (path, options={})=>{
       ensureReportApi();
       const response = await fetch(apiUrl(path), options);
-      if(!response.ok) throw new Error(`请求失败：${response.status}`);
-      if(response.status === 204) return {};
       const text = await response.text();
-      return text ? JSON.parse(text) : {};
+      const data = text ? JSON.parse(text) : {};
+      if(!response.ok) throw new Error(data.error || `请求失败：${response.status}`);
+      if(response.status === 204) return {};
+      return data;
     };
 
     const saveReport = async (report)=>{
@@ -411,9 +413,21 @@
 
     const deleteMaterial = async (id)=>requestJson(`/materials/${encodeURIComponent(id)}`, {method:"DELETE"});
 
+    const loginCloudUser = async (username, password)=>requestJson("/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({username, password})
+    });
+
+    const changeCloudPassword = async (username, currentPassword, newPassword)=>requestJson(`/users/${encodeURIComponent(username)}/password`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({currentPassword, newPassword})
+    });
+
     const normalizeUser = (username, profile={})=>({
       username,
-      password: profile.password || "0000",
+      password: profile.password || "",
       role: profile.role || "user",
       displayName: profile.displayName || profile.name || username,
       name: profile.displayName || profile.name || username,
@@ -613,13 +627,24 @@
         const msg = $("[data-report-message]", loginForm);
         const username = String(new FormData(loginForm).get("username") || "").trim();
         const password = String(new FormData(loginForm).get("password") || "");
-        const account = users[username];
-        if(account && account.password === password){
+        try{
+          let account = null;
+          if(reportApiBase){
+            const result = await loginCloudUser(username, password);
+            account = normalizeUser(result.user?.username || username, result.user || {});
+            cloudUsers = [
+              account,
+              ...cloudUsers.filter(row=>row.username !== account.username)
+            ];
+          }else{
+            throw new Error("未配置云端用户接口，不能进行登录校验。");
+          }
+          if(!account) throw new Error("用户名或密码不正确。");
           setMessage(msg, "登录成功。", "success");
-          await showPanel({username, role: account.role});
+          await showPanel({username:account.username, role:account.role});
           loginForm.reset();
-        }else{
-          setMessage(msg, "用户名或密码不正确。", "error");
+        }catch(error){
+          setMessage(msg, error.message || "用户名或密码不正确。", "error");
         }
       });
     }
@@ -643,7 +668,7 @@
           email: String(formData.get("email") || "").trim()
         };
         try{
-          await saveCloudUser({username:currentUser.username, role:"user", password:"0000", ...profile});
+          await saveCloudUser({username:currentUser.username, role:"user", ...profile});
           await getCloudUsers();
           updateCurrentUserText();
           const reportName = $("#reportName", root);
@@ -651,6 +676,37 @@
           setMessage(msg, "个人资料已保存到云端。", "success");
         }catch(error){
           setMessage(msg, `保存失败：${error.message || "请检查云端用户接口"}`, "error");
+        }
+      });
+    }
+
+    if(passwordForm){
+      passwordForm.addEventListener("submit", async (event)=>{
+        event.preventDefault();
+        if(!currentUser || currentUser.role !== "user") return;
+        const msg = $("[data-password-message]", passwordForm);
+        const formData = new FormData(passwordForm);
+        const currentPassword = String(formData.get("currentPassword") || "");
+        const newPassword = String(formData.get("newPassword") || "");
+        const confirmPassword = String(formData.get("confirmPassword") || "");
+        if(newPassword.length < 4){
+          setMessage(msg, "新密码至少需要 4 位。", "error");
+          return;
+        }
+        if(newPassword !== confirmPassword){
+          setMessage(msg, "两次输入的新密码不一致。", "error");
+          return;
+        }
+        if(!reportApiBase){
+          setMessage(msg, "未配置云端接口，暂不能修改云端密码。", "error");
+          return;
+        }
+        try{
+          await changeCloudPassword(currentUser.username, currentPassword, newPassword);
+          passwordForm.reset();
+          setMessage(msg, "密码已更新，下次登录请使用新密码。", "success");
+        }catch(error){
+          setMessage(msg, `修改失败：${error.message || "请检查当前密码"}`, "error");
         }
       });
     }
@@ -1202,7 +1258,6 @@
         const username = String(data.get("username") || "").trim();
         const profile = {
           username,
-          password:"0000",
           role:"user",
           displayName:String(data.get("displayName") || "").trim(),
           college:String(data.get("college") || "").trim(),

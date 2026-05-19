@@ -82,18 +82,38 @@ async function listUsers(env) {
   return json({ users: results.map(userFromRow) });
 }
 
+async function login(request, env) {
+  const body = await request.json();
+  const username = String(body.username || "").trim();
+  const password = String(body.password || "");
+  if (!username || !password) return json({ error: "Missing username or password" }, 400);
+
+  const row = await env.DB.prepare("SELECT * FROM users WHERE username = ?")
+    .bind(username)
+    .first();
+  if (!row || String(row.password || "") !== password) {
+    return json({ error: "Invalid username or password" }, 401);
+  }
+
+  return json({ ok: true, user: userFromRow(row) });
+}
+
 async function saveUser(request, env) {
   const body = await request.json();
   const username = String(body.username || "").trim();
   const displayName = String(body.displayName || body.name || "").trim();
   if (!username || !displayName) return json({ error: "Missing username or displayName" }, 400);
 
+  const password = Object.prototype.hasOwnProperty.call(body, "password")
+    ? String(body.password || "")
+    : "";
+
   await env.DB.prepare(`
     INSERT INTO users
       (username, password, role, display_name, college, major, entry_year, phone, email, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(username) DO UPDATE SET
-      password = excluded.password,
+      password = users.password,
       role = excluded.role,
       display_name = excluded.display_name,
       college = excluded.college,
@@ -104,7 +124,7 @@ async function saveUser(request, env) {
       updated_at = excluded.updated_at
   `).bind(
     username,
-    String(body.password || "0000"),
+    password || "0000",
     String(body.role || "user"),
     displayName,
     String(body.college || ""),
@@ -115,6 +135,31 @@ async function saveUser(request, env) {
     new Date().toISOString()
   ).run();
 
+  return json({ ok: true });
+}
+
+async function changePassword(request, env, username) {
+  const body = await request.json();
+  const oldPassword = String(body.oldPassword || body.currentPassword || "");
+  const newPassword = String(body.newPassword || "");
+  if (!username || !oldPassword || !newPassword) {
+    return json({ error: "Missing username, oldPassword or newPassword" }, 400);
+  }
+  if (newPassword.length < 4) {
+    return json({ error: "Password must be at least 4 characters" }, 400);
+  }
+
+  const row = await env.DB.prepare("SELECT password FROM users WHERE username = ?")
+    .bind(username)
+    .first();
+  if (!row) return json({ error: "User not found" }, 404);
+  if (String(row.password || "") !== oldPassword) {
+    return json({ error: "Old password is incorrect" }, 403);
+  }
+
+  await env.DB.prepare("UPDATE users SET password = ?, updated_at = ? WHERE username = ?")
+    .bind(newPassword, new Date().toISOString(), username)
+    .run();
   return json({ ok: true });
 }
 
@@ -309,8 +354,13 @@ export default {
     const path = url.pathname;
 
     try {
+      if (request.method === "POST" && path === "/login") return login(request, env);
       if (request.method === "GET" && path === "/users") return listUsers(env);
       if (request.method === "POST" && path === "/users") return saveUser(request, env);
+      if (request.method === "POST" && path.startsWith("/users/") && path.endsWith("/password")) {
+        const username = decodeURIComponent(path.replace("/users/", "").replace("/password", ""));
+        return changePassword(request, env, username);
+      }
       if (request.method === "DELETE" && path.startsWith("/users/")) {
         return deleteUser(env, decodeURIComponent(path.replace("/users/", "")));
       }

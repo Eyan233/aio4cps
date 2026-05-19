@@ -108,6 +108,7 @@
 <a href="#my-reports">提交记录</a>
 <a href="#material-downloads">资料下载</a>
 <a href="#profile-settings">个人信息</a>
+<a href="#password-settings">修改密码</a>
 <span>更多模块待接入</span>
 </nav>
 </aside>
@@ -141,6 +142,29 @@
 <button class="btn-secondary" type="submit">保存</button>
 </div>
 <p class="form-message" data-profile-message=""></p>
+</form>
+</article>
+<article class="report-panel reveal" id="password-settings">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">账户安全</span>
+<h2>修改登录密码</h2>
+<p>默认密码修改后会保存到云端数据库，后续登录以云端密码为准。</p>
+</div>
+</div>
+<form class="profile-form" data-password-form="">
+<div class="profile-grid">
+<label class="form-label" for="currentPassword">当前密码</label>
+<input autocomplete="current-password" class="form-input" id="currentPassword" name="currentPassword" required="" type="password"/>
+<label class="form-label" for="newPassword">新密码</label>
+<input autocomplete="new-password" class="form-input" id="newPassword" minlength="4" name="newPassword" required="" type="password"/>
+<label class="form-label" for="confirmPassword">确认新密码</label>
+<input autocomplete="new-password" class="form-input" id="confirmPassword" minlength="4" name="confirmPassword" required="" type="password"/>
+</div>
+<div class="profile-actions">
+<button class="btn-secondary" type="submit">更新密码</button>
+</div>
+<p class="form-message" data-password-message=""></p>
 </form>
 </article>
 <article class="report-panel reveal" id="weekly-upload">
