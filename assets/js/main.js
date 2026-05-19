@@ -269,7 +269,7 @@
     const adminPanel = $("[data-admin-panel]", root);
     const uploadForm = $("[data-upload-form]", root);
     const profileForm = $("[data-profile-form]", root);
-    const passwordForm = $("[data-password-form]", root);
+    const passwordForms = $$("[data-password-form]", root);
     const reportList = $("[data-report-list]", root);
     const userHistory = $("[data-user-history]", root);
     const userMaterials = $("[data-user-materials]", root);
@@ -680,10 +680,10 @@
       });
     }
 
-    if(passwordForm){
+    passwordForms.forEach(passwordForm=>{
       passwordForm.addEventListener("submit", async (event)=>{
         event.preventDefault();
-        if(!currentUser || currentUser.role !== "user") return;
+        if(!currentUser) return;
         const msg = $("[data-password-message]", passwordForm);
         const formData = new FormData(passwordForm);
         const currentPassword = String(formData.get("currentPassword") || "");
@@ -709,7 +709,7 @@
           setMessage(msg, `修改失败：${error.message || "请检查当前密码"}`, "error");
         }
       });
-    }
+    });
 
     if(uploadForm){
       uploadForm.addEventListener("submit", async (event)=>{
