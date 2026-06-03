@@ -360,6 +360,13 @@
 
     const apiUrl = (path)=>`${reportApiBase.replace(/\/$/, "")}${path}`;
 
+    const describeNetworkError = (error)=>{
+      if(error && error.name === "TypeError" && /fetch/i.test(error.message || "")){
+        return `无法连接云端接口 ${reportApiBase}。请检查 Worker 是否在线、CORS 是否允许当前网站，并优先将 workers.dev 地址改为可访问的自定义 API 域名。`;
+      }
+      return error && error.message ? error.message : "网络请求失败，请检查云端接口配置。";
+    };
+
     const ensureReportApi = ()=>{
       if(!reportApiBase){
         throw new Error("未配置服务器存储接口。GitHub Pages 纯静态页面不能直接接收跨设备上传，请配置后端接口或 GitHub 仓库存储服务。");
@@ -368,7 +375,12 @@
 
     const requestJson = async (path, options={})=>{
       ensureReportApi();
-      const response = await fetch(apiUrl(path), options);
+      let response;
+      try{
+        response = await fetch(apiUrl(path), options);
+      }catch(error){
+        throw new Error(describeNetworkError(error));
+      }
       const text = await response.text();
       const data = text ? JSON.parse(text) : {};
       if(!response.ok) throw new Error(data.error || `请求失败：${response.status}`);
@@ -381,7 +393,12 @@
       const formData = new FormData();
       Object.entries(report.meta).forEach(([key, value])=>formData.append(key, value));
       formData.append("file", report.file);
-      const response = await fetch(apiUrl("/reports"), {method:"POST", body:formData});
+      let response;
+      try{
+        response = await fetch(apiUrl("/reports"), {method:"POST", body:formData});
+      }catch(error){
+        throw new Error(describeNetworkError(error));
+      }
       if(!response.ok) throw new Error(`上传失败：${response.status}`);
       return response.json();
     };
