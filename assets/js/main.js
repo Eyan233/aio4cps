@@ -388,6 +388,26 @@
       return data;
     };
 
+    const postJsonWithFallback = async (path, payload)=>{
+      ensureReportApi();
+      const body = JSON.stringify(payload);
+      try{
+        return await requestJson(path, {method:"POST", body});
+      }catch(error){
+        if(!/无法连接云端接口/.test(error.message || "")) throw error;
+        try{
+          await fetch(apiUrl(path), {method:"POST", mode:"no-cors", body});
+          return {
+            ok:true,
+            opaque:true,
+            message:"请求已通过兼容模式发送。浏览器无法直接读取返回结果，请稍后查看下方记录确认。"
+          };
+        }catch(_){
+          throw error;
+        }
+      }
+    };
+
     const saveReport = async (report)=>{
       ensureReportApi();
       const formData = new FormData();
@@ -438,15 +458,9 @@
 
     const getPaperSettings = async ()=>requestJson("/paper-settings");
 
-    const savePaperSettings = async (settings)=>requestJson("/paper-settings", {
-      method:"POST",
-      body:JSON.stringify(settings)
-    });
+    const savePaperSettings = async (settings)=>postJsonWithFallback("/paper-settings", settings);
 
-    const runPaperReport = async (date)=>requestJson("/paper-run", {
-      method:"POST",
-      body:JSON.stringify({date})
-    });
+    const runPaperReport = async (date)=>postJsonWithFallback("/paper-run", {date});
 
     const getPaperRuns = async ()=>{
       const data = await requestJson("/paper-runs");
@@ -1377,7 +1391,12 @@
           if(submitter && submitter.dataset.paperRun === "manual"){
             setMessage(paperMessage, "配置已保存，正在检索论文并发送邮件...", "");
             const result = await runPaperReport(paperRunDate ? paperRunDate.value : "");
-            setMessage(paperMessage, `检索完成：发现 ${result.paperCount || 0} 篇论文。${result.message || ""}`, result.status === "stored" ? "" : "success");
+            if(result.opaque){
+              setMessage(paperMessage, result.message, "");
+              await new Promise(resolve=>setTimeout(resolve, 6000));
+            }else{
+              setMessage(paperMessage, `检索完成：发现 ${result.paperCount || 0} 篇论文。${result.message || ""}`, result.status === "stored" ? "" : "success");
+            }
             await renderPaperRuns();
           }else{
             setMessage(paperMessage, "AutoPaperReport 配置已保存。", "success");
