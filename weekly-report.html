@@ -12,7 +12,7 @@
 <link href="assets/img/logo.png" rel="icon"/>
 <link href="assets/css/styles.css" rel="stylesheet"/>
 <script>window.AIO4CPS_REPORT_API="https://aio4cps-weekly-api.suzhangsheng1999.workers.dev";</script>
-<script defer="" src="assets/js/main.js?v=20260517-1"></script>
+<script defer="" src="assets/js/main.js?v=20260603-autopaper"></script>
 <noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
 </head>
 <body class="page-weekly-report">
@@ -31,6 +31,7 @@
 <a data-page="index.html" href="index.html">首页</a>
 <a data-page="research.html" href="research.html">研究方向</a>
 <a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="demos.html" href="demos.html">项目演示</a>
 <a data-page="news.html" href="news.html">课题组新闻</a>
 <a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
 <a data-page="weekly-report.html" href="weekly-report.html">课题组事务</a>
@@ -41,6 +42,7 @@
 <a data-page="index.html" href="index.html">首页</a>
 <a data-page="research.html" href="research.html">研究方向</a>
 <a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="demos.html" href="demos.html">项目演示</a>
 <a data-page="news.html" href="news.html">课题组新闻</a>
 <a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
 <a data-page="weekly-report.html" href="weekly-report.html">课题组事务</a>
@@ -53,7 +55,7 @@
 <div class="page-hero-simple reveal">
 <span class="section-chip">事务中心</span>
 <h1 class="page-title">课题组事务</h1>
-<p class="page-lead">统一登录后进入对应工作台。当前已开放“周报提交”模块，后续可继续集成值日、报销、资料归档等事务模块。</p>
+<p class="page-lead">统一登录后进入对应工作台。当前已开放“周报提交”“资料下载”和“AutoPaperReport 自动论文报道”模块，可自动检索最新论文并发送邮件。</p>
 </div>
 </div>
 </section>
@@ -259,6 +261,7 @@
 <nav class="affairs-side-nav" aria-label="事务模块">
 <a class="active" href="#weekly-admin">周报管理</a>
 <a href="#user-admin">成员资料</a>
+<a href="#paper-admin">自动论文报道</a>
 <a href="#material-admin">资料管理</a>
 <span>更多模块待接入</span>
 </nav>
@@ -356,6 +359,47 @@
 <div class="report-empty">正在加载成员资料。</div>
 </div>
 </article>
+
+<article class="report-panel reveal" id="paper-admin">
+<div class="report-panel-head">
+<div>
+<span class="section-chip">AutoPaperReport</span>
+<h2>自动论文报道</h2>
+<p>每天 00:00 由 Cloudflare Cron 触发，按自定义标签检索当天新发表/提交论文，并通过配置的邮件通道发送到收件邮箱。</p>
+</div>
+<span class="paper-status" data-paper-status="">自动检索：待加载</span>
+</div>
+<form class="paper-form" data-paper-form="">
+<div class="paper-form-grid">
+<label class="filter-field paper-keywords-field">检索标签 / 关键词
+<textarea class="form-input" name="keywords" placeholder="每行一个关键词，如：车间调度&#10;强化学习车间调度&#10;工业数字化生产调度" required="" rows="5"></textarea>
+</label>
+<label class="filter-field">收件邮箱
+<input class="form-input" name="recipientEmail" placeholder="1253296002@qq.com" required="" type="email"/>
+</label>
+<label class="filter-field">发件人名称
+<input class="form-input" name="senderName" placeholder="AIO4CPS AutoPaperReport" type="text"/>
+</label>
+<label class="filter-field">手动检索日期
+<input class="form-input" data-paper-run-date="" type="date"/>
+</label>
+<label class="paper-toggle">
+<input checked="" name="enabled" type="checkbox"/>
+<span>启用每日 00:00 自动检索</span>
+</label>
+</div>
+<div class="paper-actions">
+<button class="btn-primary" type="submit">保存配置</button>
+<button class="btn-secondary" data-paper-run="manual" type="submit">手动检索并发送</button>
+</div>
+<p class="report-tip">邮件发送支持 Worker 环境变量 <code>RESEND_API_KEY</code> + <code>PAPER_REPORT_FROM</code>，或 <code>PAPER_REPORT_WEBHOOK_URL</code>（例如 Gmail Apps Script Webhook）。未配置邮件通道时会保存检索记录但不发送。</p>
+<p class="form-message" data-paper-message=""></p>
+</form>
+<div class="paper-runs" data-paper-runs="">
+<div class="report-empty">正在加载论文报道记录。</div>
+</div>
+</article>
+
 <article class="report-panel reveal" id="material-admin">
 <div class="report-panel-head">
 <div>

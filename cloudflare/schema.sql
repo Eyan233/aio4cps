@@ -45,3 +45,43 @@ INSERT OR REPLACE INTO users (username, password, role, display_name, college, m
 ('202409131254', '0000', 'user', '罗庆暄', '材料科学与工程', '材料与化工', '2024', '17783598675', '709235262@qq.com', datetime('now')),
 ('202413021006', '0000', 'user', '刘涛', '自动化学院', '控制科学与工程', '2024', '19855816903', '19855816903@163.com', datetime('now')),
 ('admin', 'admin@aio4cps', 'admin', 'admin', '', '', '', '', '', datetime('now'));
+
+CREATE TABLE IF NOT EXISTS paper_report_settings (
+  id TEXT PRIMARY KEY,
+  keywords TEXT NOT NULL,
+  recipient_email TEXT NOT NULL,
+  sender_name TEXT DEFAULT 'AIO4CPS AutoPaperReport',
+  enabled INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS paper_report_runs (
+  id TEXT PRIMARY KEY,
+  run_date TEXT NOT NULL,
+  keywords TEXT NOT NULL,
+  recipient_email TEXT NOT NULL,
+  paper_count INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL,
+  message TEXT DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS paper_report_papers (
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL,
+  source TEXT NOT NULL,
+  title TEXT NOT NULL,
+  authors TEXT DEFAULT '',
+  abstract TEXT DEFAULT '',
+  published_at TEXT DEFAULT '',
+  updated_at TEXT DEFAULT '',
+  url TEXT DEFAULT '',
+  pdf_url TEXT DEFAULT '',
+  matched_keyword TEXT DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+INSERT OR IGNORE INTO paper_report_settings
+  (id, keywords, recipient_email, sender_name, enabled, updated_at)
+VALUES
+  ('default', '["车间调度","强化学习车间调度","工业数字化生产调度"]', '1253296002@qq.com', 'AIO4CPS AutoPaperReport', 1, datetime('now'));

@@ -74,6 +74,55 @@ async function ensureTables(env) {
     )
   `).run();
 
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS paper_report_settings (
+      id TEXT PRIMARY KEY,
+      keywords TEXT NOT NULL,
+      recipient_email TEXT NOT NULL,
+      sender_name TEXT DEFAULT 'AIO4CPS AutoPaperReport',
+      enabled INTEGER NOT NULL DEFAULT 1,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS paper_report_runs (
+      id TEXT PRIMARY KEY,
+      run_date TEXT NOT NULL,
+      keywords TEXT NOT NULL,
+      recipient_email TEXT NOT NULL,
+      paper_count INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL,
+      message TEXT DEFAULT '',
+      created_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS paper_report_papers (
+      id TEXT PRIMARY KEY,
+      run_id TEXT NOT NULL,
+      source TEXT NOT NULL,
+      title TEXT NOT NULL,
+      authors TEXT DEFAULT '',
+      abstract TEXT DEFAULT '',
+      published_at TEXT DEFAULT '',
+      updated_at TEXT DEFAULT '',
+      url TEXT DEFAULT '',
+      pdf_url TEXT DEFAULT '',
+      matched_keyword TEXT DEFAULT '',
+      created_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    INSERT INTO paper_report_settings
+      (id, keywords, recipient_email, sender_name, enabled, updated_at)
+    VALUES ('default', '["车间调度","强化学习车间调度","工业数字化生产调度"]', '1253296002@qq.com', 'AIO4CPS AutoPaperReport', 1, ?)
+    ON CONFLICT(id) DO NOTHING
+  `).bind(new Date().toISOString()).run();
+
   await env.DB.prepare(`
     INSERT INTO users
       (username, password, role, display_name, college, major, entry_year, phone, email, updated_at)
@@ -123,6 +172,7 @@ async function saveUser(request, env) {
   const password = Object.prototype.hasOwnProperty.call(body, "password")
     ? String(body.password || "")
     : "";
+
 
   await env.DB.prepare(`
     INSERT INTO users
@@ -361,6 +411,294 @@ async function serveMaterialFile(env, id) {
   return new Response(object.body, { headers });
 }
 
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[char]));
+}
+
+function stripTags(value) {
+  return String(value || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseKeywords(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+  const raw = String(value || "").trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parseKeywords(parsed);
+  } catch (_) {}
+  return raw.split(/[\n,，;；]+/).map((item) => item.trim()).filter(Boolean);
+}
+
+function yyyyMMddInTimeZone(date, timeZone = "Asia/Shanghai") {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date).reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+function reportDateForScheduled(now = new Date()) {
+  const shanghaiDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  return yyyyMMddInTimeZone(shanghaiDate);
+}
+
+function dateToArxivRange(dateText) {
+  const compact = String(dateText || "").replace(/-/g, "");
+  return `${compact}0000 TO ${compact}2359`;
+}
+
+function escapeXmlRegex(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function firstXmlValue(xml, tag) {
+  const match = String(xml || "").match(new RegExp(`<${escapeXmlRegex(tag)}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${escapeXmlRegex(tag)}>`, "i"));
+  return stripTags(match?.[1] || "");
+}
+
+function allXmlValues(xml, tag) {
+  const values = [];
+  const re = new RegExp(`<${escapeXmlRegex(tag)}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${escapeXmlRegex(tag)}>`, "gi");
+  let match;
+  while ((match = re.exec(String(xml || "")))) values.push(stripTags(match[1]));
+  return values;
+}
+
+function parseArxivEntries(xml, keyword) {
+  const entries = [];
+  const entryRe = /<entry(?:\s[^>]*)?>([\s\S]*?)<\/entry>/gi;
+  let match;
+  while ((match = entryRe.exec(String(xml || "")))) {
+    const entry = match[1];
+    const id = firstXmlValue(entry, "id");
+    const links = Array.from(entry.matchAll(/<link\s+[^>]*>/gi)).map((m) => m[0]);
+    const pdfLink = links.find((link) => /title=["']pdf["']/i.test(link) || /type=["']application\/pdf["']/i.test(link));
+    const href = (link) => (link || "").match(/href=["']([^"']+)["']/i)?.[1] || "";
+    entries.push({
+      id,
+      source: "arXiv",
+      title: firstXmlValue(entry, "title"),
+      authors: allXmlValues(entry, "name").join(", "),
+      abstract: firstXmlValue(entry, "summary"),
+      publishedAt: firstXmlValue(entry, "published"),
+      updatedAt: firstXmlValue(entry, "updated"),
+      url: id,
+      pdfUrl: href(pdfLink) || (id ? id.replace("/abs/", "/pdf/") : ""),
+      matchedKeyword: keyword,
+    });
+  }
+  return entries.filter((item) => item.id && item.title);
+}
+
+async function searchArxivPapers(keyword, runDate) {
+  const query = `all:"${String(keyword).replace(/"/g, " ")}" AND submittedDate:[${dateToArxivRange(runDate)}]`;
+  const url = new URL("https://export.arxiv.org/api/query");
+  url.searchParams.set("search_query", query);
+  url.searchParams.set("start", "0");
+  url.searchParams.set("max_results", "20");
+  url.searchParams.set("sortBy", "submittedDate");
+  url.searchParams.set("sortOrder", "descending");
+  const response = await fetch(url.toString(), {
+    headers: { "User-Agent": "AIO4CPS-AutoPaperReport/1.0 (mailto:1253296002@qq.com)" },
+  });
+  if (!response.ok) throw new Error(`arXiv 检索失败：${response.status}`);
+  return parseArxivEntries(await response.text(), keyword);
+}
+
+async function getPaperSettings(env) {
+  const row = await env.DB.prepare("SELECT * FROM paper_report_settings WHERE id = 'default'").first();
+  return {
+    keywords: parseKeywords(row?.keywords),
+    recipientEmail: row?.recipient_email || "1253296002@qq.com",
+    senderName: row?.sender_name || "AIO4CPS AutoPaperReport",
+    enabled: row?.enabled !== 0,
+    updatedAt: row?.updated_at || "",
+  };
+}
+
+async function getPaperSettingsResponse(env) {
+  return json({ settings: await getPaperSettings(env) });
+}
+
+async function savePaperSettings(request, env) {
+  const body = await request.json();
+  const keywords = parseKeywords(body.keywords);
+  const recipientEmail = String(body.recipientEmail || body.recipient_email || "").trim();
+  const senderName = String(body.senderName || body.sender_name || "AIO4CPS AutoPaperReport").trim();
+  const enabled = body.enabled === false ? 0 : 1;
+  if (!keywords.length) return json({ error: "请至少配置一个检索标签/关键词" }, 400);
+  if (!recipientEmail || !recipientEmail.includes("@")) return json({ error: "请配置有效的收件邮箱" }, 400);
+  await env.DB.prepare(`
+    INSERT INTO paper_report_settings (id, keywords, recipient_email, sender_name, enabled, updated_at)
+    VALUES ('default', ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      keywords = excluded.keywords,
+      recipient_email = excluded.recipient_email,
+      sender_name = excluded.sender_name,
+      enabled = excluded.enabled,
+      updated_at = excluded.updated_at
+  `).bind(JSON.stringify(keywords), recipientEmail, senderName, enabled, new Date().toISOString()).run();
+  return json({ ok: true, settings: await getPaperSettings(env) });
+}
+
+function paperReportHtml({ runDate, keywords, papers }) {
+  const rows = papers.map((paper, index) => `
+    <article style="margin:0 0 20px;padding:16px;border:1px solid #dbe5f0;border-radius:10px;background:#fbfdff">
+      <h3 style="margin:0 0 8px;color:#17324d">${index + 1}. ${escapeHtml(paper.title)}</h3>
+      <p><strong>作者：</strong>${escapeHtml(paper.authors || "未知")}</p>
+      <p><strong>发表/提交时间：</strong>${escapeHtml(paper.publishedAt || "")}</p>
+      <p><strong>匹配标签：</strong>${escapeHtml(paper.matchedKeyword || "")}</p>
+      <p><strong>摘要：</strong>${escapeHtml(paper.abstract || "暂无摘要")}</p>
+      <p><a href="${escapeHtml(paper.url)}">原文页面</a>${paper.pdfUrl ? ` · <a href="${escapeHtml(paper.pdfUrl)}">PDF</a>` : ""}</p>
+    </article>`).join("");
+  return `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;color:#17324d;line-height:1.7">
+      <h2>AIO4CPS AutoPaperReport · ${escapeHtml(runDate)}</h2>
+      <p>检索标签：${escapeHtml(keywords.join("、"))}</p>
+      <p>今日共发现 <strong>${papers.length}</strong> 篇新论文。系统当前优先抓取 arXiv 的题名、作者、摘要、发表时间和原文/PDF链接；引言等全文内容请通过原文链接查看。</p>
+      ${rows || "<p>今天没有检索到匹配的新论文。</p>"}
+    </div>`;
+}
+
+function paperReportText({ runDate, keywords, papers }) {
+  const body = papers.map((paper, index) => [
+    `${index + 1}. ${paper.title}`,
+    `作者：${paper.authors || "未知"}`,
+    `发表/提交时间：${paper.publishedAt || ""}`,
+    `匹配标签：${paper.matchedKeyword || ""}`,
+    `摘要：${paper.abstract || "暂无摘要"}`,
+    `原文：${paper.url}`,
+    paper.pdfUrl ? `PDF：${paper.pdfUrl}` : "",
+  ].filter(Boolean).join("\n")).join("\n\n");
+  return `AIO4CPS AutoPaperReport · ${runDate}\n检索标签：${keywords.join("、")}\n今日共发现 ${papers.length} 篇新论文。\n\n${body || "今天没有检索到匹配的新论文。"}`;
+}
+
+async function sendPaperEmail(env, payload) {
+  const subject = `AIO4CPS AutoPaperReport：${payload.runDate} 新论文 ${payload.papers.length} 篇`;
+  const html = paperReportHtml(payload);
+  const text = paperReportText(payload);
+  if (env.RESEND_API_KEY) {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: env.PAPER_REPORT_FROM || `${payload.senderName} <onboarding@resend.dev>`,
+        to: [payload.recipientEmail],
+        subject,
+        html,
+        text,
+      }),
+    });
+    const data = await response.text();
+    if (!response.ok) throw new Error(`邮件发送失败：${data || response.status}`);
+    return "邮件已通过 Resend 发送。";
+  }
+  if (env.PAPER_REPORT_WEBHOOK_URL) {
+    const response = await fetch(env.PAPER_REPORT_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(env.PAPER_REPORT_WEBHOOK_TOKEN ? { Authorization: `Bearer ${env.PAPER_REPORT_WEBHOOK_TOKEN}` } : {}) },
+      body: JSON.stringify({ to: payload.recipientEmail, subject, html, text }),
+    });
+    const data = await response.text();
+    if (!response.ok) throw new Error(`邮件 Webhook 发送失败：${data || response.status}`);
+    return "邮件已通过自定义 Webhook 发送。";
+  }
+  return "未配置 RESEND_API_KEY 或 PAPER_REPORT_WEBHOOK_URL，已完成检索并保存结果，但未发送邮件。";
+}
+
+async function runPaperReport(env, options = {}) {
+  const settings = await getPaperSettings(env);
+  if (!settings.enabled && !options.force) return { ok: true, skipped: true, message: "AutoPaperReport 已停用。" };
+  const runDate = String(options.date || reportDateForScheduled()).slice(0, 10);
+  const keywords = options.keywords?.length ? options.keywords : settings.keywords;
+  const runId = `paper-${runDate}-${Date.now()}`;
+  const createdAt = new Date().toISOString();
+  const seen = new Map();
+
+  for (const keyword of keywords) {
+    const papers = await searchArxivPapers(keyword, runDate);
+    papers.forEach((paper) => {
+      const key = paper.id || paper.url || `${paper.title}-${paper.publishedAt}`;
+      const old = seen.get(key);
+      seen.set(key, old ? { ...old, matchedKeyword: `${old.matchedKeyword}、${keyword}` } : paper);
+    });
+  }
+
+  const papers = Array.from(seen.values());
+  let status = "success";
+  let message = await sendPaperEmail(env, { ...settings, runDate, keywords, papers });
+  if (message.startsWith("未配置")) status = "stored";
+
+  await env.DB.prepare(`
+    INSERT INTO paper_report_runs (id, run_date, keywords, recipient_email, paper_count, status, message, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(runId, runDate, JSON.stringify(keywords), settings.recipientEmail, papers.length, status, message, createdAt).run();
+
+  for (const paper of papers) {
+    await env.DB.prepare(`
+      INSERT INTO paper_report_papers
+        (id, run_id, source, title, authors, abstract, published_at, updated_at, url, pdf_url, matched_keyword, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      crypto.randomUUID(), runId, paper.source, paper.title, paper.authors, paper.abstract,
+      paper.publishedAt, paper.updatedAt, paper.url, paper.pdfUrl, paper.matchedKeyword, createdAt
+    ).run();
+  }
+
+  return { ok: true, runId, runDate, keywords, paperCount: papers.length, status, message, papers };
+}
+
+async function runPaperReportResponse(request, env) {
+  const body = request.method === "POST" ? await request.json().catch(() => ({})) : {};
+  return json(await runPaperReport(env, { date: body.date, force: true }));
+}
+
+async function listPaperRuns(env) {
+  const { results } = await env.DB.prepare("SELECT * FROM paper_report_runs ORDER BY created_at DESC LIMIT 12").all();
+  const runs = [];
+  for (const row of results) {
+    const papers = await env.DB.prepare("SELECT * FROM paper_report_papers WHERE run_id = ? ORDER BY published_at DESC").bind(row.id).all();
+    runs.push({
+      id: row.id,
+      runDate: row.run_date,
+      keywords: parseKeywords(row.keywords),
+      recipientEmail: row.recipient_email,
+      paperCount: row.paper_count,
+      status: row.status,
+      message: row.message || "",
+      createdAt: row.created_at,
+      papers: (papers.results || []).map((paper) => ({
+        title: paper.title,
+        authors: paper.authors,
+        abstract: paper.abstract,
+        publishedAt: paper.published_at,
+        url: paper.url,
+        pdfUrl: paper.pdf_url,
+        matchedKeyword: paper.matched_keyword,
+      })),
+    });
+  }
+  return json({ runs });
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -399,9 +737,20 @@ export default {
       if (request.method === "GET" && path.startsWith("/material-files/")) {
         return serveMaterialFile(env, decodeURIComponent(path.replace("/material-files/", "")));
       }
+      if (request.method === "GET" && path === "/paper-settings") return getPaperSettingsResponse(env);
+      if (request.method === "POST" && path === "/paper-settings") return savePaperSettings(request, env);
+      if (request.method === "POST" && path === "/paper-run") return runPaperReportResponse(request, env);
+      if (request.method === "GET" && path === "/paper-runs") return listPaperRuns(env);
       return json({ error: "Not found" }, 404);
     } catch (error) {
       return json({ error: error.message || "Server error" }, 500);
     }
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => {
+      await ensureTables(env);
+      await runPaperReport(env);
+    })());
   },
 };

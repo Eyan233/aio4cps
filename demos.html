@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>项目演示 | CPS人工智能与优化课题组</title>
+<meta content="CPS人工智能与优化课题组项目演示页，展示课题组在智慧交通、智能制造等方向的系统演示视频。" name="description"/>
+<meta content="CPS人工智能与优化课题组, 项目演示, 智慧交通, 智能制造, 数字孪生, 仿真系统" name="keywords"/>
+<meta content="AI and Optimization for Cyber-Physical Systems Research Group, Chongqing University" name="author"/>
+<meta content="index,follow" name="robots"/>
+<meta content="项目演示 | CPS人工智能与优化课题组" property="og:title"/>
+<meta content="CPS人工智能与优化课题组项目演示页，展示课题组在智慧交通、智能制造等方向的系统演示视频。" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://aio4cps.top/demos.html" property="og:url"/>
+<meta content="https://aio4cps.top/assets/img/logo.png" property="og:image"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="项目演示 | CPS人工智能与优化课题组" name="twitter:title"/>
+<meta content="CPS人工智能与优化课题组项目演示页，展示课题组在智慧交通、智能制造等方向的系统演示视频。" name="twitter:description"/>
+<meta content="https://aio4cps.top/assets/img/logo.png" name="twitter:image"/>
+<meta content="#F4F7FB" name="theme-color"/>
+<link href="https://aio4cps.top/demos.html" rel="canonical"/>
+<link href="assets/img/logo.png" rel="icon"/>
+<link href="assets/css/styles.css" rel="stylesheet"/>
+<script defer src="assets/js/main.js"></script>
+<noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
+<style>
+/* ── Demo page specific styles ── */
+.demo-hero{
+  padding:46px 0 28px;
+  background:radial-gradient(960px 500px at 8% 0%, rgba(45,120,196,.10), transparent 56%),
+             radial-gradient(700px 420px at 100% 10%, rgba(15,118,110,.08), transparent 56%),
+             linear-gradient(180deg,#fbfdff 0%, rgba(244,247,251,.96) 100%);
+}
+.demo-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:22px;
+  margin-top:32px;
+}
+.demo-card{
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+.demo-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 20px 48px rgba(24,50,77,.13);
+}
+.demo-card:focus-visible{
+  outline:3px solid var(--primary);
+  outline-offset:3px;
+}
+.demo-thumb{
+  position:relative;
+  aspect-ratio:16/9;
+  background:#dce8f4;
+  overflow:hidden;
+}
+.demo-thumb video,
+.demo-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.demo-thumb-iframe-wrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.demo-thumb-iframe-wrap iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+.demo-play-btn{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(17,40,68,.28);
+  transition:background .2s ease;
+}
+.demo-card:hover .demo-play-btn{
+  background:rgba(17,40,68,.42);
+}
+.demo-play-icon{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.22);
+  transition:transform .2s ease;
+}
+.demo-card:hover .demo-play-icon{
+  transform:scale(1.08);
+}
+.demo-play-icon svg{
+  width:22px;
+  height:22px;
+  fill:var(--primary);
+  stroke:none;
+  margin-left:3px;
+}
+.demo-body{
+  padding:20px 22px 22px;
+}
+.demo-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-bottom:10px;
+}
+.demo-tag{
+  display:inline-flex;
+  padding:5px 10px;
+  border-radius:999px;
+  background:rgba(31,95,174,.08);
+  color:var(--primary);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.2px;
+}
+.demo-body h3{
+  margin:0 0 8px;
+  font-size:20px;
+  line-height:1.4;
+}
+.demo-body p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.78;
+}
+.demo-body-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px dashed var(--line);
+}
+.demo-watch-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:var(--primary);
+  font-weight:700;
+  font-size:14px;
+}
+.demo-watch-link svg{
+  width:14px;
+  height:14px;
+  stroke:var(--primary);
+  fill:none;
+}
+.demo-source-badge{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:700;
+}
+
+/* ── Lightbox ── */
+.demo-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(10,20,36,.82);
+  backdrop-filter:blur(10px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .28s ease;
+}
+.demo-lightbox.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.demo-lightbox-inner{
+  position:relative;
+  width:100%;
+  max-width:960px;
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.38);
+  transform:scale(.96);
+  transition:transform .28s ease;
+}
+.demo-lightbox.open .demo-lightbox-inner{
+  transform:scale(1);
+}
+.demo-lightbox-video-wrap{
+  position:relative;
+  aspect-ratio:16/9;
+  background:#000;
+}
+.demo-lightbox-video-wrap video,
+.demo-lightbox-video-wrap iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+.demo-lightbox-info{
+  padding:18px 22px 20px;
+}
+.demo-lightbox-info h2{
+  margin:0 0 6px;
+  font-size:22px;
+  line-height:1.35;
+  padding-right:40px;
+}
+.demo-lightbox-info p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.75;
+}
+.demo-lightbox-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+  color:var(--text);
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  transition:background .18s ease;
+  z-index:10;
+}
+.demo-lightbox-close:hover{
+  background:#fff;
+  color:var(--primary);
+}
+.demo-empty{
+  grid-column:1/-1;
+  display:grid;
+  place-items:center;
+  min-height:240px;
+  padding:32px;
+  border:1px dashed var(--line-strong);
+  border-radius:var(--radius);
+  color:var(--muted);
+  text-align:center;
+  line-height:1.7;
+}
+.demo-filter-bar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:22px;
+}
+.demo-filter-btn{
+  padding:9px 16px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.demo-filter-btn:hover{
+  border-color:var(--line-strong);
+  color:var(--text);
+}
+.demo-filter-btn.active{
+  background:rgba(31,95,174,.10);
+  border-color:rgba(31,95,174,.22);
+  color:var(--primary);
+}
+@media(max-width:720px){
+  .demo-grid{
+    grid-template-columns:1fr;
+  }
+  .demo-lightbox-inner{
+    border-radius:14px;
+  }
+  .demo-lightbox-info h2{
+    font-size:18px;
+  }
+}
+</style>
+</head>
+<body class="page-demos">
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+<div class="topbar">
+<div class="container">
+<div class="nav">
+<a aria-label="CPS人工智能与优化课题组首页" class="brand" href="index.html">
+<img alt="CPS人工智能与优化课题组标识" src="assets/img/logo.png"/>
+<span class="brand-text">
+<span class="t2">AI and Optimization for Cyber-Physical Systems</span>
+<span class="t1">CPS人工智能与优化课题组</span>
+</span>
+</a>
+<div aria-label="Primary" class="navlinks">
+<a data-page="index.html" href="index.html">首页</a>
+<a data-page="research.html" href="research.html">研究方向</a>
+<a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="demos.html" href="demos.html">项目演示</a>
+<a data-page="news.html" href="news.html">课题组新闻</a>
+<a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
+<a data-page="weekly-report.html" href="weekly-report.html">课题组事务</a>
+</div>
+<button aria-controls="mobileNav" aria-expanded="false" aria-label="打开导航菜单" class="hamburger" id="hamburger">菜单</button>
+</div>
+<div aria-label="移动端导航" class="mobile" hidden id="mobileNav">
+<a data-page="index.html" href="index.html">首页</a>
+<a data-page="research.html" href="research.html">研究方向</a>
+<a data-page="achievements.html" href="achievements.html">研究成果</a>
+<a data-page="demos.html" href="demos.html">项目演示</a>
+<a data-page="news.html" href="news.html">课题组新闻</a>
+<a data-page="cooperation.html" href="cooperation.html">招生与合作</a>
+<a data-page="weekly-report.html" href="weekly-report.html">课题组事务</a>
+</div>
+</div>
+</div>
+
+<main id="main-content">
+  <!-- Hero -->
+  <section class="demo-hero">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-chip">项目演示</span>
+        <h1 class="page-title" style="margin-top:14px;">系统演示视频</h1>
+        <p class="page-lead">课题组在智慧交通、智能制造等方向的系统原型与仿真演示，欢迎交流合作。</p>
+      </div>
+      <!-- Tag filter bar, populated by JS -->
+      <div class="demo-filter-bar" id="demoFilterBar" role="group" aria-label="按标签筛选演示"></div>
+    </div>
+  </section>
+
+  <!-- Demo grid -->
+  <section class="section" style="padding-top:8px;">
+    <div class="container">
+      <div class="demo-grid" id="demoGrid" aria-live="polite">
+        <div class="demo-empty">正在加载演示内容…</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Lightbox -->
+<div class="demo-lightbox" id="demoLightbox" role="dialog" aria-modal="true" aria-label="演示视频播放器" hidden>
+  <div class="demo-lightbox-inner" id="demoLightboxInner">
+    <button class="demo-lightbox-close" id="demoLightboxClose" aria-label="关闭播放器" type="button">✕</button>
+    <div class="demo-lightbox-video-wrap" id="demoLightboxVideoWrap"></div>
+    <div class="demo-lightbox-info" id="demoLightboxInfo"></div>
+  </div>
+</div>
+
+<div class="footer">
+<div class="container footer-row">
+<div>© <span data-current-year=""></span> CPS人工智能与优化课题组 · 重庆大学自动化学院</div>
+<div><a href="mailto:jiang_shl@cqu.edu.cn">jiang_shl@cqu.edu.cn</a></div>
+</div>
+</div>
+
+<script>
+(function(){
+  const grid = document.getElementById("demoGrid");
+  const filterBar = document.getElementById("demoFilterBar");
+  const lightbox = document.getElementById("demoLightbox");
+  const lightboxInner = document.getElementById("demoLightboxInner");
+  const lightboxClose = document.getElementById("demoLightboxClose");
+  const videoWrap = document.getElementById("demoLightboxVideoWrap");
+  const infoWrap = document.getElementById("demoLightboxInfo");
+
+  let allDemos = [];
+  let activeTag = "全部";
+
+  // ── helpers ──────────────────────────────────────────────
+  const escHtml = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  const sourceLabel = (type) => ({
+    local: "本地视频",
+    youtube: "YouTube",
+    bilibili: "Bilibili",
+    iframe: "外部链接"
+  }[type] || "视频");
+
+  // Build embed/video HTML for lightbox
+  const buildPlayerHtml = (demo) => {
+    if(demo.type === "local"){
+      return `<video src="${escHtml(demo.src)}" ${demo.poster ? `poster="${escHtml(demo.poster)}"` : ""} controls autoplay playsinline style="position:absolute;inset:0;width:100%;height:100%;background:#000;"></video>`;
+    }
+    if(demo.type === "youtube"){
+      // Accept full URL or video ID
+      const id = demo.src.includes("youtu") ? (demo.src.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/)||[])[1] || demo.src : demo.src;
+      return `<iframe src="https://www.youtube.com/embed/${escHtml(id)}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen title="${escHtml(demo.title)}"></iframe>`;
+    }
+    if(demo.type === "bilibili"){
+      // Accept bvid or full URL
+      const bvMatch = demo.src.match(/BV[A-Za-z0-9]+/);
+      const bvid = bvMatch ? bvMatch[0] : demo.src;
+      return `<iframe src="https://player.bilibili.com/player.html?bvid=${escHtml(bvid)}&autoplay=1&high_quality=1" allow="autoplay; fullscreen" allowfullscreen scrolling="no" title="${escHtml(demo.title)}"></iframe>`;
+    }
+    // Generic iframe fallback
+    return `<iframe src="${escHtml(demo.src)}" allow="autoplay; fullscreen" allowfullscreen title="${escHtml(demo.title)}"></iframe>`;
+  };
+
+  // Build thumbnail preview
+  const buildThumbHtml = (demo) => {
+    if(demo.type === "local"){
+      return `<video src="${escHtml(demo.src)}" ${demo.poster ? `poster="${escHtml(demo.poster)}"` : ""} muted loop preload="metadata" playsinline tabindex="-1" aria-hidden="true"></video>`;
+    }
+    if(demo.poster){
+      return `<img src="${escHtml(demo.poster)}" alt="${escHtml(demo.title)} 封面" loading="lazy"/>`;
+    }
+    if(demo.type === "youtube"){
+      const id = demo.src.includes("youtu") ? (demo.src.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/)||[])[1] || demo.src : demo.src;
+      return `<img src="https://img.youtube.com/vi/${escHtml(id)}/hqdefault.jpg" alt="${escHtml(demo.title)} 封面" loading="lazy"/>`;
+    }
+    // Placeholder for bilibili / iframe without poster
+    return `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8f0fb,#dce8f4);color:var(--primary);font-size:40px;">▶</div>`;
+  };
+
+  // ── Render ────────────────────────────────────────────────
+  const renderGrid = (demos) => {
+    if(!demos.length){
+      grid.innerHTML = `<div class="demo-empty">暂无符合条件的演示项目。</div>`;
+      return;
+    }
+    grid.innerHTML = demos.map((demo, i) => `
+      <article class="demo-card card-soft reveal${i < 4 ? " in" : ""}"
+               tabindex="0"
+               role="button"
+               aria-label="播放演示：${escHtml(demo.title)}"
+               data-demo-id="${escHtml(demo.id)}">
+        <div class="demo-thumb">
+          ${buildThumbHtml(demo)}
+          <div class="demo-play-btn" aria-hidden="true">
+            <div class="demo-play-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="demo-body">
+          <div class="demo-tags">
+            ${(demo.tags||[]).map(t=>`<span class="demo-tag">${escHtml(t)}</span>`).join("")}
+          </div>
+          <h3>${escHtml(demo.title)}</h3>
+          <p>${escHtml(demo.description)}</p>
+          <div class="demo-body-footer">
+            <span class="demo-watch-link">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/></svg>
+              点击播放
+            </span>
+            <span class="demo-source-badge">${escHtml(sourceLabel(demo.type))}</span>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    // Hover-play for local video thumbnails
+    grid.querySelectorAll(".demo-card").forEach(card => {
+      const vid = card.querySelector("video");
+      if(vid){
+        card.addEventListener("mouseenter", () => vid.play().catch(()=>{}));
+        card.addEventListener("mouseleave", () => { vid.pause(); vid.currentTime = 0; });
+      }
+    });
+  };
+
+  const renderFilters = (demos) => {
+    const tags = ["全部", ...new Set(demos.flatMap(d => d.tags || []))];
+    filterBar.innerHTML = tags.map(tag =>
+      `<button class="demo-filter-btn${tag === activeTag ? " active" : ""}" data-tag="${escHtml(tag)}" type="button">${escHtml(tag)}</button>`
+    ).join("");
+  };
+
+  const applyFilter = () => {
+    const filtered = activeTag === "全部" ? allDemos : allDemos.filter(d => (d.tags||[]).includes(activeTag));
+    renderGrid(filtered);
+  };
+
+  // ── Lightbox ──────────────────────────────────────────────
+  let currentVideoEl = null;
+
+  const openLightbox = (demo) => {
+    videoWrap.innerHTML = buildPlayerHtml(demo);
+    infoWrap.innerHTML = `
+      <div class="demo-tags" style="margin-bottom:8px;">
+        ${(demo.tags||[]).map(t=>`<span class="demo-tag">${escHtml(t)}</span>`).join("")}
+      </div>
+      <h2>${escHtml(demo.title)}</h2>
+      <p>${escHtml(demo.description)}</p>
+    `;
+    lightbox.hidden = false;
+    requestAnimationFrame(() => {
+      lightbox.classList.add("open");
+    });
+    document.body.style.overflow = "hidden";
+    lightboxClose.focus();
+    currentVideoEl = videoWrap.querySelector("video");
+  };
+
+  const closeLightbox = () => {
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+    setTimeout(() => {
+      lightbox.hidden = true;
+      videoWrap.innerHTML = "";
+      infoWrap.innerHTML = "";
+      currentVideoEl = null;
+    }, 300);
+  };
+
+  lightboxClose.addEventListener("click", closeLightbox);
+
+  lightbox.addEventListener("click", (e) => {
+    if(!lightboxInner.contains(e.target)) closeLightbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && !lightbox.hidden) closeLightbox();
+  });
+
+  // ── Card click / keyboard ─────────────────────────────────
+  grid.addEventListener("click", (e) => {
+    const card = e.target.closest("[data-demo-id]");
+    if(!card) return;
+    const demo = allDemos.find(d => d.id === card.dataset.demoId);
+    if(demo) openLightbox(demo);
+  });
+
+  grid.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" || e.key === " "){
+      const card = e.target.closest("[data-demo-id]");
+      if(!card) return;
+      e.preventDefault();
+      const demo = allDemos.find(d => d.id === card.dataset.demoId);
+      if(demo) openLightbox(demo);
+    }
+  });
+
+  // ── Filter clicks ─────────────────────────────────────────
+  filterBar.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-tag]");
+    if(!btn) return;
+    activeTag = btn.dataset.tag;
+    filterBar.querySelectorAll(".demo-filter-btn").forEach(b => b.classList.toggle("active", b.dataset.tag === activeTag));
+    applyFilter();
+  });
+
+  // ── Load data ─────────────────────────────────────────────
+  fetch("data_demos.json")
+    .then(r => r.json())
+    .then(data => {
+      allDemos = Array.isArray(data) ? data : [];
+      renderFilters(allDemos);
+      renderGrid(allDemos);
+    })
+    .catch(() => {
+      grid.innerHTML = `<div class="demo-empty">演示数据加载失败，请检查 data_demos.json 文件。</div>`;
+    });
+
+  // ── Deep-link: demos.html#traffic-demo ───────────────────
+  const hashId = location.hash.replace("#", "");
+  if(hashId){
+    // Wait for data to load then auto-open
+    const tryOpen = () => {
+      const demo = allDemos.find(d => d.id === hashId);
+      if(demo) openLightbox(demo);
+    };
+    window.addEventListener("demosLoaded", tryOpen, {once:true});
+  }
+})();
+</script>
+</body>
+</html>

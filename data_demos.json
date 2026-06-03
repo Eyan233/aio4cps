@@ -1,0 +1,20 @@
+[
+  {
+    "id": "traffic-demo",
+    "title": "网联汽车协同仿真演示",
+    "description": "面向网联汽车与自动驾驶场景，展示多车协同感知与智能决策仿真系统的运行效果。",
+    "tags": ["智慧交通", "自动驾驶", "仿真"],
+    "type": "local",
+    "src": "assets/img/traffic-demo.mp4",
+    "poster": ""
+  },
+  {
+    "id": "digital-twin-demo",
+    "title": "钢铁生产数字孪生演示",
+    "description": "面向钢铁多要素协同生产场景，展示数字孪生系统的动态调度与运行决策过程。",
+    "tags": ["智能制造", "数字孪生", "调度优化"],
+    "type": "local",
+    "src": "assets/img/digital-twin-demo.mp4",
+    "poster": ""
+  }
+]

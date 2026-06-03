@@ -63,3 +63,22 @@
 
 ```txt
 aio4cps.top
+```
+
+---
+
+## AutoPaperReport 自动论文报道
+
+课题组事务系统已接入 AutoPaperReport：管理员登录“课题组事务”后，可在“自动论文报道”模块自定义检索标签、收件邮箱，并手动触发检索发送。后端由 `cloudflare/weekly-worker.js` 提供以下能力：
+
+- `GET /paper-settings` / `POST /paper-settings`：读取和保存检索标签、收件邮箱、启停状态。
+- `POST /paper-run`：按指定日期手动检索并发送论文报道。
+- `GET /paper-runs`：查看最近检索记录和匹配论文。
+- `scheduled()`：供 Cloudflare Workers Cron Triggers 每天 00:00 自动执行。
+
+邮件发送支持两种配置方式（二选一）：
+
+1. **Resend API**：配置 Worker 环境变量 `RESEND_API_KEY`，并配置 `PAPER_REPORT_FROM`（如 `AIO4CPS AutoPaperReport <paper@your-domain.com>`）。
+2. **自定义邮件 Webhook**：配置 `PAPER_REPORT_WEBHOOK_URL`，可选配置 `PAPER_REPORT_WEBHOOK_TOKEN`。Webhook 适合对接 Gmail Apps Script，由 Apps Script 使用谷歌邮箱代发到 QQ 邮箱。
+
+若未配置邮件通道，系统仍会完成论文检索并保存记录，但不会实际发送邮件。自动执行时间需要在 Cloudflare Worker 的 Cron Triggers 中配置，例如按北京时间每日 00:00 可配置为 UTC 前一天 16:00 对应的 cron 表达式。

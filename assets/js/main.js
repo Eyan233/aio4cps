@@ -290,6 +290,11 @@
     const progressList = $("[data-progress-list]", root);
     const adminUserForm = $("[data-admin-user-form]", root);
     const userList = $("[data-user-list]", root);
+    const paperForm = $("[data-paper-form]", root);
+    const paperMessage = $("[data-paper-message]", root);
+    const paperRunDate = $("[data-paper-run-date]", root);
+    const paperRuns = $("[data-paper-runs]", root);
+    const paperStatus = $("[data-paper-status]", root);
     const reportApiBase = window.AIO4CPS_REPORT_API || "";
     let currentUser = null;
     let cachedReports = [];
@@ -412,6 +417,26 @@
     };
 
     const deleteMaterial = async (id)=>requestJson(`/materials/${encodeURIComponent(id)}`, {method:"DELETE"});
+
+
+    const getPaperSettings = async ()=>requestJson("/paper-settings");
+
+    const savePaperSettings = async (settings)=>requestJson("/paper-settings", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(settings)
+    });
+
+    const runPaperReport = async (date)=>requestJson("/paper-run", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({date})
+    });
+
+    const getPaperRuns = async ()=>{
+      const data = await requestJson("/paper-runs");
+      return data.runs || [];
+    };
 
     const loginCloudUser = async (username, password)=>requestJson("/login", {
       method:"POST",
@@ -606,6 +631,8 @@
         renderReports();
         renderUsers();
         renderMaterials("admin");
+        loadPaperSettings();
+        renderPaperRuns();
       }
       window.scrollTo({top:0, behavior:"smooth"});
     };
@@ -1066,6 +1093,64 @@
       }
     };
 
+
+    const renderPaperRuns = async ()=>{
+      if(!paperRuns) return;
+      if(!reportApiBase){
+        paperRuns.innerHTML = '<div class="report-empty">尚未配置服务器接口，无法加载论文报道记录。</div>';
+        return;
+      }
+      try{
+        const runs = await getPaperRuns();
+        if(!runs.length){
+          paperRuns.innerHTML = '<div class="report-empty">暂无检索记录。可点击“手动检索并发送”生成第一条记录。</div>';
+          return;
+        }
+        paperRuns.innerHTML = runs.map(run=>`
+          <div class="paper-run-card">
+            <div class="paper-run-head">
+              <div><strong>${escapeHtml(run.runDate)}</strong><span>${escapeHtml((run.keywords || []).join("、"))}</span></div>
+              <em>${escapeHtml(run.status || "")}</em>
+            </div>
+            <p>${escapeHtml(run.message || "")}</p>
+            <div class="paper-run-meta">收件人：${escapeHtml(run.recipientEmail || "")} · 新论文：${Number(run.paperCount || 0)} 篇 · ${escapeHtml(run.createdAt || "")}</div>
+            <div class="paper-list-mini">
+              ${(run.papers || []).map(paper=>`
+                <article>
+                  <h4>${escapeHtml(paper.title || "未命名论文")}</h4>
+                  <p>${escapeHtml(paper.authors || "未知作者")}</p>
+                  <p>${escapeHtml(paper.abstract || "暂无摘要")}</p>
+                  <div>${paper.url ? `<a href="${escapeHtml(paper.url)}" target="_blank" rel="noopener">原文</a>` : ""}${paper.pdfUrl ? ` · <a href="${escapeHtml(paper.pdfUrl)}" target="_blank" rel="noopener">PDF</a>` : ""}</div>
+                </article>`).join("") || '<div class="report-empty">本次没有匹配的新论文。</div>'}
+            </div>
+          </div>`).join("");
+      }catch(error){
+        paperRuns.innerHTML = `<div class="report-empty">论文报道记录加载失败：${escapeHtml(error.message || "请检查接口配置")}</div>`;
+      }
+    };
+
+    const loadPaperSettings = async ()=>{
+      if(!paperForm || !reportApiBase) return;
+      try{
+        const data = await getPaperSettings();
+        const settings = data.settings || {};
+        const fields = {
+          keywords:(settings.keywords || []).join("\n"),
+          recipientEmail:settings.recipientEmail || "1253296002@qq.com",
+          senderName:settings.senderName || "AIO4CPS AutoPaperReport"
+        };
+        Object.entries(fields).forEach(([name, value])=>{
+          const input = $(`[name="${name}"]`, paperForm);
+          if(input) input.value = value;
+        });
+        const enabled = $('[name="enabled"]', paperForm);
+        if(enabled) enabled.checked = settings.enabled !== false;
+        if(paperStatus) paperStatus.textContent = settings.enabled === false ? "自动检索：已停用" : "自动检索：每日 00:00（需在 Cloudflare Cron 中配置）";
+      }catch(error){
+        setMessage(paperMessage, `配置加载失败：${error.message || "请检查论文报道接口"}`, "error");
+      }
+    };
+
     const updateProgress = async ()=>{
       const rows = await getCloudUsers();
       const userRows = rows.filter(row=>row.role !== "admin");
@@ -1251,6 +1336,40 @@
           await renderMaterials("user");
         }catch(error){
           setMessage(msg, error.message || "资料上传失败，请检查云端接口。", "error");
+        }
+      });
+    }
+
+
+    if(paperForm){
+      paperForm.addEventListener("submit", async (event)=>{
+        event.preventDefault();
+        const formData = new FormData(paperForm);
+        const submitter = event.submitter;
+        const settings = {
+          keywords:String(formData.get("keywords") || "").split(/[\n,，;；]+/).map(item=>item.trim()).filter(Boolean),
+          recipientEmail:String(formData.get("recipientEmail") || "").trim(),
+          senderName:String(formData.get("senderName") || "").trim(),
+          enabled:formData.get("enabled") === "on"
+        };
+        if(!settings.keywords.length){
+          setMessage(paperMessage, "请至少填写一个检索标签。", "error");
+          return;
+        }
+        try{
+          setMessage(paperMessage, "正在保存配置...", "");
+          await savePaperSettings(settings);
+          if(submitter && submitter.dataset.paperRun === "manual"){
+            setMessage(paperMessage, "配置已保存，正在检索论文并发送邮件...", "");
+            const result = await runPaperReport(paperRunDate ? paperRunDate.value : "");
+            setMessage(paperMessage, `检索完成：发现 ${result.paperCount || 0} 篇论文。${result.message || ""}`, result.status === "stored" ? "" : "success");
+            await renderPaperRuns();
+          }else{
+            setMessage(paperMessage, "AutoPaperReport 配置已保存。", "success");
+          }
+          await loadPaperSettings();
+        }catch(error){
+          setMessage(paperMessage, `操作失败：${error.message || "请检查论文报道接口或邮件配置"}`, "error");
         }
       });
     }
