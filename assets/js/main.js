@@ -440,13 +440,11 @@
 
     const savePaperSettings = async (settings)=>requestJson("/paper-settings", {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
       body:JSON.stringify(settings)
     });
 
     const runPaperReport = async (date)=>requestJson("/paper-run", {
       method:"POST",
-      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({date})
     });
 
