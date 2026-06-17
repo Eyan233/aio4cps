@@ -296,6 +296,16 @@
     const paperRuns = $("[data-paper-runs]", root);
     const paperStatus = $("[data-paper-status]", root);
     const reportApiBase = window.AIO4CPS_REPORT_API || "";
+    const collapsiblePanelIds = new Set([
+      "profile-settings",
+      "password-settings",
+      "my-reports",
+      "material-downloads",
+      "user-admin",
+      "paper-admin",
+      "material-admin"
+    ]);
+    const defaultCollapsedPanelIds = new Set(collapsiblePanelIds);
     let currentUser = null;
     let cachedReports = [];
     let cloudUsers = [];
@@ -356,6 +366,47 @@
           control.disabled = uploading;
         });
       }
+    };
+
+    const panelTitle = (panel)=>{
+      const title = $("h2", panel);
+      return title ? title.textContent.trim() : "面板";
+    };
+
+    const setPanelCollapsed = (panel, collapsed)=>{
+      if(!panel) return;
+      panel.classList.toggle("is-collapsed", collapsed);
+      const toggle = $("[data-panel-toggle]", panel);
+      if(toggle){
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.textContent = collapsed ? "展开" : "收起";
+        toggle.setAttribute("aria-label", `${collapsed ? "展开" : "收起"}${panelTitle(panel)}`);
+      }
+    };
+
+    const openPanel = (id)=>{
+      const panel = id ? document.getElementById(id) : null;
+      if(panel && panel.dataset.collapsible === "true") setPanelCollapsed(panel, false);
+    };
+
+    const initCollapsiblePanels = (role)=>{
+      const scope = role === "admin" ? adminPanel : userPanel;
+      if(!scope) return;
+      $$("article.report-panel[id]", scope).forEach(panel=>{
+        if(!collapsiblePanelIds.has(panel.id)) return;
+        panel.dataset.collapsible = "true";
+        const head = $(".report-panel-head", panel);
+        if(head && !$("[data-panel-toggle]", panel)){
+          const toggle = document.createElement("button");
+          toggle.className = "panel-toggle";
+          toggle.type = "button";
+          toggle.dataset.panelToggle = panel.id;
+          head.appendChild(toggle);
+        }
+        setPanelCollapsed(panel, defaultCollapsedPanelIds.has(panel.id));
+      });
+      const targetId = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : "";
+      if(targetId) openPanel(targetId);
     };
 
     const apiUrl = (path)=>`${reportApiBase.replace(/\/$/, "")}${path}`;
@@ -633,6 +684,7 @@
       if(role === "user") await getUserProfile(account.username);
       if(role === "admin") await getCloudUsers();
       updateCurrentUserText();
+      initCollapsiblePanels(role);
       const reportName = $("#reportName", root);
       if(reportName && role === "user") reportName.value = getDisplayName(account.username);
       if(role === "user"){
@@ -1300,6 +1352,20 @@
       const resetUserButton = event.target.closest("[data-reset-user-form]");
       const deleteMaterialButton = event.target.closest("[data-delete-material]");
       const togglePasswordButton = event.target.closest("[data-toggle-password]");
+      const panelToggle = event.target.closest("[data-panel-toggle]");
+      const sideNavLink = event.target.closest(".affairs-side-nav a[href^='#']");
+      if(panelToggle){
+        const panel = document.getElementById(panelToggle.dataset.panelToggle || "");
+        if(panel) setPanelCollapsed(panel, !panel.classList.contains("is-collapsed"));
+      }
+      if(sideNavLink){
+        const targetId = decodeURIComponent(sideNavLink.getAttribute("href").slice(1));
+        openPanel(targetId);
+        const nav = sideNavLink.closest(".affairs-side-nav");
+        if(nav){
+          $$("a", nav).forEach(link=>link.classList.toggle("active", link === sideNavLink));
+        }
+      }
       if(downloadButton) downloadReport(downloadButton.dataset.downloadReport || downloadButton.dataset.downloadCurrent);
       if(downloadSelectedButton) downloadSelectedReports();
       if(deleteButton) deleteReports([deleteButton.dataset.deleteReport]);
