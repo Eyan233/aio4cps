@@ -262,6 +262,9 @@
       "202513131180": {role:"user", name:"张富均", college:"自动化学院", major:"电子信息", entryYear:"2025", phone:"15923858308", email:"15923858308@163.com"},
       "202409131254": {role:"user", name:"罗庆暄", college:"材料科学与工程", major:"材料与化工", entryYear:"2024", phone:"17783598675", email:"709235262@qq.com"},
       "202413021006": {role:"user", name:"刘涛", college:"自动化学院", major:"控制科学与工程", entryYear:"2024", phone:"19855816903", email:"19855816903@163.com"},
+      "202613131242": {role:"user", name:"史堎榆", college:"自动化学院", major:"交通运输", entryYear:"2026", phone:"", email:""},
+      "202613131164": {role:"user", name:"汤仁华", college:"自动化学院", major:"电子信息", entryYear:"2026", phone:"", email:""},
+      "202613021028": {role:"user", name:"吴柄澍", college:"自动化学院", major:"控制科学与工程", entryYear:"2026", phone:"", email:""},
       "admin": {role:"admin"}
     };
     const gate = $("[data-report-gate]", root);
