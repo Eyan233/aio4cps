@@ -286,6 +286,12 @@
     const filterWeek = $("[data-filter-week]", root);
     const weekSelect = $("[data-week-select]", root);
     const weekFilter = $("[data-week-filter]", root);
+    const reportTypeSelect = $("[data-report-type]", root);
+    const filterType = $("[data-filter-type]", root);
+    const uploadSubmit = $("[data-upload-submit]", root);
+    const uploadGuidance = $("[data-upload-guidance]", root);
+    const avatarInput = $("[name='avatar']", root);
+    const avatarMessage = $("[data-avatar-message]", root);
     const currentWeekText = $("[data-current-week-text]", root);
     const currentWeekLabels = $$("[data-current-week-label]", root);
     const progressSummary = $("[data-progress-summary]", root);
@@ -350,7 +356,7 @@
         weekFilter.innerHTML = '<option value="">全部周次</option>' + weekOptions.map(info=>`<option value="${escapeHtml(info.shortLabel)}">${escapeHtml(info.shortLabel)}</option>`).join("");
       }
       if(currentWeekText){
-        currentWeekText.textContent = `当前周编号为${currentWeekInfo.shortLabel}：${formatWeekDate(currentWeekInfo.start)} - ${formatWeekDate(currentWeekInfo.end)}。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。`;
+        currentWeekText.textContent = `当前归档周次为${currentWeekInfo.shortLabel}：${formatWeekDate(currentWeekInfo.start)} - ${formatWeekDate(currentWeekInfo.end)}。成员可提交周报或阅读报告，管理员可集中查看、下载与归档。`;
       }
       currentWeekLabels.forEach(el=>{ el.textContent = currentWeekInfo.shortLabel; });
     };
@@ -368,6 +374,16 @@
         $$("input,select,button", uploadForm).forEach(control=>{
           control.disabled = uploading;
         });
+      }
+    };
+
+    const syncReportTypeUi = ()=>{
+      const type = reportTypeSelect ? reportTypeSelect.value : "周报";
+      if(uploadSubmit) uploadSubmit.textContent = `提交${type}`;
+      if(uploadGuidance){
+        uploadGuidance.textContent = type === "阅读报告"
+          ? "阅读报告会按所选周次归档，同一周重新提交将覆盖原文件。"
+          : "周报按周次归档，同一周重新提交将覆盖原文件。";
       }
     };
 
@@ -543,7 +559,10 @@
       major: profile.major || "",
       entryYear: profile.entryYear || profile.entry_year || "",
       phone: profile.phone || "",
-      email: profile.email || ""
+      email: profile.email || "",
+      hasAvatar: Boolean(profile.hasAvatar),
+      avatarType: profile.avatarType || "",
+      updatedAt: profile.updatedAt || ""
     });
 
     const defaultUserRows = ()=>Object.entries(users)
@@ -626,6 +645,61 @@
       return profile.displayName || profile.name || username;
     };
 
+    const getAvatarUrl = (profile)=>{
+      if(!reportApiBase || !profile || !profile.hasAvatar || !profile.username) return "";
+      const version = encodeURIComponent(profile.updatedAt || Date.now());
+      return `${apiUrl(`/avatars/${encodeURIComponent(profile.username)}`)}?v=${version}`;
+    };
+
+    const avatarFallbackText = (profile)=>{
+      const name = String(profile.displayName || profile.name || profile.username || "成员").trim();
+      return name.length > 2 ? name.slice(-2) : name;
+    };
+
+    const paintAvatar = (profile, previewUrl="")=>{
+      $$('[data-avatar-view]', root).forEach(view=>{
+        const image = $("[data-avatar-image]", view);
+        const fallback = $("[data-avatar-fallback]", view);
+        const source = previewUrl || getAvatarUrl(profile);
+        if(fallback) fallback.textContent = avatarFallbackText(profile);
+        if(!image) return;
+        image.onload = ()=>{
+          image.hidden = false;
+          if(fallback) fallback.hidden = true;
+          if(previewUrl.startsWith("blob:")) URL.revokeObjectURL(previewUrl);
+        };
+        image.onerror = ()=>{
+          image.hidden = true;
+          if(fallback) fallback.hidden = false;
+        };
+        if(source){
+          image.hidden = true;
+          if(fallback) fallback.hidden = false;
+          image.src = source;
+        }else{
+          image.removeAttribute("src");
+          image.hidden = true;
+          if(fallback) fallback.hidden = false;
+        }
+      });
+    };
+
+    const saveAvatar = async (username, password, file)=>{
+      ensureReportApi();
+      const formData = new FormData();
+      formData.append("avatar", file);
+      formData.append("password", password);
+      const response = await fetch(apiUrl(`/users/${encodeURIComponent(username)}/avatar`), {method:"POST", body:formData});
+      const data = await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.error || `头像上传失败：${response.status}`);
+      return data;
+    };
+
+    const removeAvatar = async (username, password)=>requestJson(`/users/${encodeURIComponent(username)}/avatar`, {
+      method:"DELETE",
+      headers:{"X-User-Password":password}
+    });
+
     const populateUserFilter = ()=>{
       if(!filterName || filterName.tagName !== "SELECT") return;
       const rows = (cloudUsers.length ? cloudUsers : defaultUserRows()).filter(row=>row.role !== "admin");
@@ -644,6 +718,12 @@
         const nameText = currentUser.role === "admin" ? currentUser.username : `${getDisplayName(currentUser.username)} · ${currentUser.username}`;
         el.textContent = `${nameText} · ${roleText}`;
       });
+      if(currentUser.role === "user"){
+        const profile = getProfile(currentUser.username);
+        const greeting = $("[data-user-greeting]", root);
+        if(greeting) greeting.textContent = `${getDisplayName(currentUser.username)}，你好`;
+        paintAvatar({...profile, username:currentUser.username});
+      }
     };
 
     const isAllowedFile = (file)=>{
@@ -657,12 +737,12 @@
       return match ? match[1] : "0";
     };
 
-    const reportIdFor = (username, week)=>`${username}-week-${getWeekNumber(week)}`;
+    const reportIdFor = (username, reportType, week)=>`${username}-${reportType === "阅读报告" ? "reading" : "week"}-${getWeekNumber(week)}`;
 
     const getVisibleReports = (reports)=>{
       const latest = new Map();
       reports.forEach(report=>{
-        const key = `${report.username || report.name}|${report.week}`;
+        const key = `${report.username || report.name}|${report.reportType || "周报"}|${report.week}`;
         const current = latest.get(key);
         if(!current || String(report.uploadedAt).localeCompare(String(current.uploadedAt)) > 0){
           latest.set(key, report);
@@ -671,7 +751,7 @@
       return Array.from(latest.values()).sort((a, b)=>String(b.uploadedAt).localeCompare(String(a.uploadedAt)));
     };
 
-    const getCurrentWeekReports = ()=>cachedReports.filter(report=>String(report.week || "").includes(currentWeekInfo.shortLabel));
+    const getCurrentWeekReports = ()=>cachedReports.filter(report=>(report.reportType || "周报") === "周报" && String(report.week || "").includes(currentWeekInfo.shortLabel));
 
     const updateCurrentWeekReportCount = ()=>{
       if(reportCount) reportCount.textContent = String(getCurrentWeekReports().length);
@@ -705,6 +785,7 @@
           const input = $(`[name="${key}"]`, root);
           if(input) input.value = value;
         });
+        paintAvatar({...profile, username:account.username});
       }
       $$("[data-user-panel] .reveal, [data-admin-panel] .reveal", root).forEach(el=>el.classList.add("in"));
       if(role === "user"){
@@ -752,7 +833,7 @@
           }
           if(!account) throw new Error("用户名或密码不正确。");
           setMessage(msg, "登录成功。", "success");
-          await showPanel({username:account.username, role:account.role});
+          await showPanel({username:account.username, role:account.role, authPassword:password});
           loginForm.reset();
         }catch(error){
           setMessage(msg, error.message || "用户名或密码不正确。", "error");
@@ -791,6 +872,63 @@
       });
     }
 
+    if(avatarInput){
+      avatarInput.addEventListener("change", ()=>{
+        const file = avatarInput.files && avatarInput.files[0];
+        if(!file) return;
+        if(file.size > 3 * 1024 * 1024){
+          avatarInput.value = "";
+          setMessage(avatarMessage, "头像文件不能超过 3 MB。", "error");
+          return;
+        }
+        paintAvatar({...getProfile(currentUser?.username || ""), username:currentUser?.username || ""}, URL.createObjectURL(file));
+        setMessage(avatarMessage, "预览已更新，点击“更新头像”后保存。", "");
+      });
+    }
+
+    const avatarUploadButton = $("[data-avatar-upload]", root);
+    if(avatarUploadButton){
+      avatarUploadButton.addEventListener("click", async ()=>{
+        const file = avatarInput?.files && avatarInput.files[0];
+        if(!currentUser || currentUser.role !== "user" || !file){
+          setMessage(avatarMessage, "请先选择头像文件。", "error");
+          return;
+        }
+        try{
+          avatarUploadButton.disabled = true;
+          setMessage(avatarMessage, "正在上传头像...", "");
+          await saveAvatar(currentUser.username, currentUser.authPassword || "", file);
+          await getCloudUsers();
+          avatarInput.value = "";
+          updateCurrentUserText();
+          setMessage(avatarMessage, "头像已更新。", "success");
+        }catch(error){
+          setMessage(avatarMessage, `头像更新失败：${error.message || "请检查网络"}`, "error");
+        }finally{
+          avatarUploadButton.disabled = false;
+        }
+      });
+    }
+
+    const avatarRemoveButton = $("[data-avatar-remove]", root);
+    if(avatarRemoveButton){
+      avatarRemoveButton.addEventListener("click", async ()=>{
+        if(!currentUser || currentUser.role !== "user") return;
+        try{
+          avatarRemoveButton.disabled = true;
+          await removeAvatar(currentUser.username, currentUser.authPassword || "");
+          await getCloudUsers();
+          avatarInput.value = "";
+          updateCurrentUserText();
+          setMessage(avatarMessage, "头像已移除。", "success");
+        }catch(error){
+          setMessage(avatarMessage, `移除失败：${error.message || "请检查网络"}`, "error");
+        }finally{
+          avatarRemoveButton.disabled = false;
+        }
+      });
+    }
+
     passwordForms.forEach(passwordForm=>{
       passwordForm.addEventListener("submit", async (event)=>{
         event.preventDefault();
@@ -814,6 +952,7 @@
         }
         try{
           await changeCloudPassword(currentUser.username, currentPassword, newPassword);
+          currentUser.authPassword = newPassword;
           passwordForm.reset();
           setMessage(msg, "密码已更新，下次登录请使用新密码。", "success");
         }catch(error){
@@ -830,6 +969,7 @@
         const username = currentUser && currentUser.role === "user" ? currentUser.username : String(formData.get("name") || "").trim();
         const profile = currentUser && currentUser.role === "user" ? getProfile(currentUser.username) : {};
         const name = currentUser && currentUser.role === "user" ? getDisplayName(currentUser.username) : username;
+        const reportType = String(formData.get("reportType") || "周报").trim();
         const week = String(formData.get("week") || "").trim();
         const file = formData.get("file");
         if(!name || !week || !(file instanceof File) || !file.name){
@@ -844,7 +984,7 @@
           setUploading(true);
           const result = await saveReport({
             meta: {
-              id: reportIdFor(username, week),
+              id: reportIdFor(username, reportType, week),
               name,
               username,
               displayName: name,
@@ -853,6 +993,7 @@
               entryYear: profile.entryYear || "",
               phone: profile.phone || "",
               email: profile.email || "",
+              reportType,
               week,
               fileName: file.name,
               fileType: file.type || "application/octet-stream",
@@ -866,7 +1007,8 @@
           if(reportName && currentUser) reportName.value = getDisplayName(currentUser.username);
           const weekSelect = $("#reportWeek", uploadForm);
           if(weekSelect) weekSelect.value = currentWeekInfo.label;
-          setMessage(msg, result.replaced ? "已覆盖该周原周报。" : "周报已提交。", "success");
+          setMessage(msg, result.replaced ? `已覆盖该周原${reportType}。` : `${reportType}已提交。`, "success");
+          syncReportTypeUi();
           await renderUserHistory();
         }catch(error){
           setMessage(msg, error.message || "保存失败，请检查服务器存储接口后重试。", "error");
@@ -963,7 +1105,7 @@
         const response = await fetch(url);
         if(!response.ok) return null;
         return {
-          name: safeFileName(`${report.username || report.name}-${report.week}-${report.fileName}`),
+          name: safeFileName(`${report.username || report.name}-${report.reportType || "周报"}-${report.week}-${report.fileName}`),
           data: await response.arrayBuffer()
         };
       }));
@@ -971,7 +1113,7 @@
       const url = URL.createObjectURL(zip);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `周报打包-${new Date().toISOString().slice(0, 10)}.zip`;
+      link.download = `报告打包-${new Date().toISOString().slice(0, 10)}.zip`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -988,7 +1130,7 @@
         if(selectedCount) selectedCount.textContent = "请先选择文件";
         return;
       }
-      if(!window.confirm(`确定删除 ${realIds.length} 份周报吗？删除后本浏览器中不可恢复。`)) return;
+      if(!window.confirm(`确定删除 ${realIds.length} 份报告吗？删除后不可恢复。`)) return;
       await Promise.all(realIds.map(deleteReport));
       clearPreview();
       await renderReports();
@@ -1022,13 +1164,15 @@
     const getFilteredReports = ()=>{
       const nameValue = filterName ? filterName.value.trim().toLowerCase() : "";
       const weekValue = filterWeek ? filterWeek.value : "";
+      const typeValue = filterType ? filterType.value : "";
       return cachedReports.filter(report=>{
         const nameText = `${report.name || ""} ${report.username || ""}`.toLowerCase();
         const selectedUser = String(report.username || "").toLowerCase();
         const weekText = String(report.week || "");
         const matchesName = !nameValue || selectedUser === nameValue || nameText.includes(nameValue);
         const matchesWeek = !weekValue || weekText.includes(weekValue);
-        return matchesName && matchesWeek;
+        const matchesType = !typeValue || (report.reportType || "周报") === typeValue;
+        return matchesName && matchesWeek && matchesType;
       });
     };
 
@@ -1036,7 +1180,7 @@
       if(!reportList) return;
       const reports = getFilteredReports();
       if(!reports.length){
-        reportList.innerHTML = '<div class="report-empty">没有符合条件的周报。</div>';
+        reportList.innerHTML = '<div class="report-empty">没有符合条件的报告。</div>';
         updateCurrentWeekReportCount();
         updateSelectedCount();
         return;
@@ -1056,8 +1200,9 @@
           : `<button class="btn-primary" disabled="" type="button">下载</button>`;
         return `
           <div class="report-item" data-report-id="${report.id}">
-            <input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的周报"/>
+            <input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的${escapeHtml(report.reportType || "周报")}"/>
             <div class="report-item-cell"><strong>${escapeHtml(displayName)}</strong>${escapeHtml(report.username || "")}</div>
+            <div class="report-item-cell"><span class="report-type-badge">${escapeHtml(report.reportType || "周报")}</span></div>
             <div class="report-item-cell">${escapeHtml(report.week)}</div>
             <div class="report-item-cell report-file-name" title="${escapeHtml(report.fileName)}">${escapeHtml(report.fileName)} · ${formatSize(report.fileSize || 0)}</div>
             <div class="report-item-cell">${uploaded}</div>
@@ -1072,6 +1217,7 @@
         <div class="report-table-head">
           <span></span>
           <span>成员</span>
+          <span>类型</span>
           <span>周次</span>
           <span>文件</span>
           <span>提交时间</span>
@@ -1095,8 +1241,9 @@
         : `<button class="btn-primary" disabled="" type="button">下载</button>`;
       return `
         <div class="report-item" data-report-id="${escapeHtml(report.id)}">
-          ${selectable ? `<input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的周报"/>` : "<span></span>"}
+          ${selectable ? `<input class="report-select" data-select-report="" type="checkbox" value="${escapeHtml(report.id)}" aria-label="选择 ${escapeHtml(displayName)} 的${escapeHtml(report.reportType || "周报")}"/>` : "<span></span>"}
           <div class="report-item-cell"><strong>${escapeHtml(displayName)}</strong>${escapeHtml(report.username || "")}</div>
+          <div class="report-item-cell"><span class="report-type-badge">${escapeHtml(report.reportType || "周报")}</span></div>
           <div class="report-item-cell">${escapeHtml(report.week)}</div>
           <div class="report-item-cell report-file-name" title="${escapeHtml(report.fileName)}">${escapeHtml(report.fileName)} · ${formatSize(report.fileSize || 0)}</div>
           <div class="report-item-cell">${uploaded}</div>
@@ -1126,6 +1273,7 @@
           <div class="report-table-head">
             <span></span>
             <span>成员</span>
+            <span>类型</span>
             <span>周次</span>
             <span>文件</span>
             <span>提交时间</span>
@@ -1239,7 +1387,7 @@
       const rows = await getCloudUsers();
       const userRows = rows.filter(row=>row.role !== "admin");
       const currentWeek = currentWeekInfo.shortLabel;
-      const currentReports = cachedReports.filter(report=>String(report.week || "").includes(currentWeek));
+      const currentReports = cachedReports.filter(report=>(report.reportType || "周报") === "周报" && String(report.week || "").includes(currentWeek));
       const submitted = new Set(currentReports.map(report=>report.username || report.name));
       const doneRows = userRows.filter(row=>submitted.has(row.username) || submitted.has(row.displayName) || submitted.has(row.name));
       const missingRows = userRows.filter(row=>!submitted.has(row.username) && !submitted.has(row.displayName) && !submitted.has(row.name));
@@ -1328,14 +1476,14 @@
         cachedReports = getVisibleReports(await getReports());
       }catch(error){
         cachedReports = [];
-        reportList.innerHTML = `<div class="report-empty">周报列表加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
+        reportList.innerHTML = `<div class="report-empty">报告列表加载失败：${escapeHtml(error.message || "请检查网络或接口配置")}</div>`;
         updateCurrentWeekReportCount();
         updateSelectedCount();
         updateProgress();
         return;
       }
       if(!cachedReports.length){
-        reportList.innerHTML = '<div class="report-empty">暂无周报记录。</div>';
+        reportList.innerHTML = '<div class="report-empty">暂无报告记录。</div>';
         updateCurrentWeekReportCount();
         updateSelectedCount();
         updateProgress();
@@ -1407,6 +1555,8 @@
       if(event.target.closest("[data-select-report]")) updateSelectedCount();
       if(event.target.closest("[data-filter-week]")) paintReportList();
       if(event.target.closest("[data-filter-name]")) paintReportList();
+      if(event.target.closest("[data-filter-type]")) paintReportList();
+      if(event.target.closest("[data-report-type]")) syncReportTypeUi();
     });
 
     root.addEventListener("input", (event)=>{
@@ -1437,6 +1587,8 @@
         }
       });
     }
+
+    syncReportTypeUi();
 
 
     if(paperForm){

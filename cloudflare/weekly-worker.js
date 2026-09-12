@@ -1,7 +1,7 @@
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, X-User-Password",
 };
 
 function json(data, status = 200) {
@@ -26,8 +26,17 @@ function userFromRow(row) {
     entryYear: row.entry_year || "",
     phone: row.phone || "",
     email: row.email || "",
+    hasAvatar: Boolean(row.avatar_key),
+    avatarType: row.avatar_type || "",
     updatedAt: row.updated_at,
   };
+}
+
+async function ensureColumn(env, table, column, definition) {
+  const { results } = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+  if (!results.some((row) => row.name === column)) {
+    await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+  }
 }
 
 async function ensureTables(env) {
@@ -42,6 +51,8 @@ async function ensureTables(env) {
       entry_year TEXT DEFAULT '',
       phone TEXT DEFAULT '',
       email TEXT DEFAULT '',
+      avatar_key TEXT DEFAULT '',
+      avatar_type TEXT DEFAULT '',
       updated_at TEXT NOT NULL
     )
   `).run();
@@ -51,6 +62,7 @@ async function ensureTables(env) {
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL,
       display_name TEXT,
+      report_type TEXT NOT NULL DEFAULT '周报',
       week TEXT NOT NULL,
       file_name TEXT NOT NULL,
       file_type TEXT NOT NULL,
@@ -60,6 +72,10 @@ async function ensureTables(env) {
       uploaded_at TEXT NOT NULL
     )
   `).run();
+
+  await ensureColumn(env, "users", "avatar_key", "TEXT DEFAULT ''");
+  await ensureColumn(env, "users", "avatar_type", "TEXT DEFAULT ''");
+  await ensureColumn(env, "reports", "report_type", "TEXT NOT NULL DEFAULT '周报'");
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS materials (
@@ -231,8 +247,57 @@ async function changePassword(request, env, username) {
 
 async function deleteUser(env, username) {
   if (username === "admin") return json({ error: "Admin cannot be deleted" }, 400);
+  const old = await env.DB.prepare("SELECT avatar_key FROM users WHERE username = ?").bind(username).first();
+  if (old?.avatar_key) await env.REPORT_BUCKET.delete(old.avatar_key);
   await env.DB.prepare("DELETE FROM users WHERE username = ?").bind(username).run();
   return json({ ok: true });
+}
+
+async function saveAvatar(request, env, username) {
+  const form = await request.formData();
+  const file = form.get("avatar");
+  const password = String(form.get("password") || "");
+  const user = await env.DB.prepare("SELECT avatar_key, password FROM users WHERE username = ?").bind(username).first();
+  if (!user) return json({ error: "User not found" }, 404);
+  if (!password || String(user.password || "") !== password) return json({ error: "Invalid password" }, 403);
+  if (!(file instanceof File)) return json({ error: "Missing avatar" }, 400);
+  const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+  if (!allowedTypes.has(file.type)) return json({ error: "Unsupported avatar type" }, 400);
+  if (file.size > 3 * 1024 * 1024) return json({ error: "Avatar exceeds 3 MB" }, 400);
+
+  const avatarKey = `avatars/${safeName(username)}/${Date.now()}-${safeName(file.name || "avatar")}`;
+  await env.REPORT_BUCKET.put(avatarKey, file.stream(), {
+    httpMetadata: { contentType: file.type },
+  });
+  await env.DB.prepare("UPDATE users SET avatar_key = ?, avatar_type = ?, updated_at = ? WHERE username = ?")
+    .bind(avatarKey, file.type, new Date().toISOString(), username)
+    .run();
+  if (user.avatar_key && user.avatar_key !== avatarKey) await env.REPORT_BUCKET.delete(user.avatar_key);
+  return json({ ok: true });
+}
+
+async function deleteAvatar(request, env, username) {
+  const password = String(request.headers.get("X-User-Password") || "");
+  const user = await env.DB.prepare("SELECT avatar_key, password FROM users WHERE username = ?").bind(username).first();
+  if (!user) return json({ error: "User not found" }, 404);
+  if (!password || String(user.password || "") !== password) return json({ error: "Invalid password" }, 403);
+  if (user.avatar_key) await env.REPORT_BUCKET.delete(user.avatar_key);
+  await env.DB.prepare("UPDATE users SET avatar_key = '', avatar_type = '', updated_at = ? WHERE username = ?")
+    .bind(new Date().toISOString(), username)
+    .run();
+  return json({ ok: true });
+}
+
+async function serveAvatar(env, username) {
+  const user = await env.DB.prepare("SELECT avatar_key, avatar_type FROM users WHERE username = ?").bind(username).first();
+  if (!user?.avatar_key) return json({ error: "Avatar not found" }, 404);
+  const object = await env.REPORT_BUCKET.get(user.avatar_key);
+  if (!object) return json({ error: "Avatar file not found" }, 404);
+  const headers = new Headers(CORS);
+  headers.set("Content-Type", user.avatar_type || "image/jpeg");
+  headers.set("Content-Disposition", "inline");
+  headers.set("Cache-Control", "public, max-age=3600");
+  return new Response(object.body, { headers });
 }
 
 async function listReports(request, env) {
@@ -247,6 +312,7 @@ async function listReports(request, env) {
       username: r.username,
       name: r.display_name || r.username,
       displayName: r.display_name || r.username,
+      reportType: r.report_type || "周报",
       week: r.week,
       fileName: r.file_name,
       fileType: r.file_type,
@@ -266,11 +332,13 @@ async function saveReport(request, env) {
 
   const username = String(form.get("username") || "").trim();
   const displayName = String(form.get("displayName") || form.get("name") || username).trim();
+  const requestedReportType = String(form.get("reportType") || "周报").trim();
+  const reportType = requestedReportType === "阅读报告" ? "阅读报告" : "周报";
   const week = String(form.get("week") || "").trim();
   const fileName = safeName(form.get("fileName") || file.name);
   const fileType = String(form.get("fileType") || file.type || "application/octet-stream");
   const fileSize = Number(form.get("fileSize") || file.size || 0);
-  const id = String(form.get("id") || `${username}-${week}`);
+  const id = String(form.get("id") || `${username}-${reportType === "阅读报告" ? "reading" : "week"}-${week}`);
 
   if (!username || !week) return json({ error: "Missing username or week" }, 400);
 
@@ -281,7 +349,7 @@ async function saveReport(request, env) {
   if (old?.r2_key) await env.REPORT_BUCKET.delete(old.r2_key);
   if (old?.pdf_key && old.pdf_key !== old.r2_key) await env.REPORT_BUCKET.delete(old.pdf_key);
 
-  const r2Key = `reports/${safeName(username)}/${safeName(week)}/${Date.now()}-${fileName}`;
+  const r2Key = `reports/${safeName(username)}/${safeName(reportType)}/${safeName(week)}/${Date.now()}-${fileName}`;
   const isPdf = fileName.toLowerCase().endsWith(".pdf") || fileType === "application/pdf";
   const pdfKey = isPdf ? r2Key : "";
 
@@ -293,11 +361,12 @@ async function saveReport(request, env) {
 
   await env.DB.prepare(`
     INSERT INTO reports
-      (id, username, display_name, week, file_name, file_type, file_size, r2_key, pdf_key, uploaded_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (id, username, display_name, report_type, week, file_name, file_type, file_size, r2_key, pdf_key, uploaded_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       username = excluded.username,
       display_name = excluded.display_name,
+      report_type = excluded.report_type,
       week = excluded.week,
       file_name = excluded.file_name,
       file_type = excluded.file_type,
@@ -305,7 +374,7 @@ async function saveReport(request, env) {
       r2_key = excluded.r2_key,
       pdf_key = excluded.pdf_key,
       uploaded_at = excluded.uploaded_at
-  `).bind(id, username, displayName, week, fileName, fileType, fileSize, r2Key, pdfKey, uploadedAt).run();
+  `).bind(id, username, displayName, reportType, week, fileName, fileType, fileSize, r2Key, pdfKey, uploadedAt).run();
 
   return json({ ok: true, replaced: Boolean(old), id });
 }
@@ -711,12 +780,23 @@ export default {
       if (request.method === "POST" && path === "/login") return login(request, env);
       if (request.method === "GET" && path === "/users") return listUsers(env);
       if (request.method === "POST" && path === "/users") return saveUser(request, env);
+      if (request.method === "POST" && path.startsWith("/users/") && path.endsWith("/avatar")) {
+        const username = decodeURIComponent(path.replace("/users/", "").replace("/avatar", ""));
+        return saveAvatar(request, env, username);
+      }
+      if (request.method === "DELETE" && path.startsWith("/users/") && path.endsWith("/avatar")) {
+        const username = decodeURIComponent(path.replace("/users/", "").replace("/avatar", ""));
+        return deleteAvatar(request, env, username);
+      }
       if (request.method === "POST" && path.startsWith("/users/") && path.endsWith("/password")) {
         const username = decodeURIComponent(path.replace("/users/", "").replace("/password", ""));
         return changePassword(request, env, username);
       }
       if (request.method === "DELETE" && path.startsWith("/users/")) {
         return deleteUser(env, decodeURIComponent(path.replace("/users/", "")));
+      }
+      if (request.method === "GET" && path.startsWith("/avatars/")) {
+        return serveAvatar(env, decodeURIComponent(path.replace("/avatars/", "")));
       }
       if (request.method === "GET" && path === "/reports") return listReports(request, env);
       if (request.method === "POST" && path === "/reports") return saveReport(request, env);

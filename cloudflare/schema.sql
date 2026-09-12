@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS users (
   entry_year TEXT DEFAULT '',
   phone TEXT DEFAULT '',
   email TEXT DEFAULT '',
+  avatar_key TEXT DEFAULT '',
+  avatar_type TEXT DEFAULT '',
   updated_at TEXT NOT NULL
 );
 
@@ -15,6 +17,7 @@ CREATE TABLE IF NOT EXISTS reports (
   id TEXT PRIMARY KEY,
   username TEXT NOT NULL,
   display_name TEXT,
+  report_type TEXT NOT NULL DEFAULT '周报',
   week TEXT NOT NULL,
   file_name TEXT NOT NULL,
   file_type TEXT NOT NULL,

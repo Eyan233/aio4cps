@@ -4,15 +4,15 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>课题组事务 | CPS人工智能与优化课题组</title>
-<meta content="CPS人工智能与优化课题组事务中心，支持成员登录后提交周报，管理员查看和下载周报文件。" name="description"/>
-<meta content="CPS人工智能与优化课题组, 课题组事务, 周报, 文件上传, PDF, Word" name="keywords"/>
+<meta content="CPS人工智能与优化课题组事务中心，支持成员登录后提交周报和阅读报告，管理员统一查看与归档。" name="description"/>
+<meta content="CPS人工智能与优化课题组, 课题组事务, 周报, 阅读报告, 文件上传, PDF, Word" name="keywords"/>
 <meta content="AI and Optimization for Cyber-Physical Systems Research Group, Chongqing University" name="author"/>
 <meta content="noindex,nofollow" name="robots"/>
 <meta content="#F4F7FB" name="theme-color"/>
 <link href="assets/img/logo.png" rel="icon"/>
-<link href="assets/css/styles.css" rel="stylesheet"/>
+<link href="assets/css/styles.css?v=20260912-member-workspace" rel="stylesheet"/>
 <script>window.AIO4CPS_REPORT_API="https://aio4cps-weekly-api.suzhangsheng1999.workers.dev";</script>
-<script defer="" src="assets/js/main.js?v=20260616-collapsible-workspace"></script>
+<script defer="" src="assets/js/main.js?v=20260912-member-workspace"></script>
 <noscript><style>.reveal{opacity:1 !important; transform:none !important;}</style></noscript>
 </head>
 <body class="page-weekly-report">
@@ -55,7 +55,7 @@
 <div class="page-hero-simple reveal">
 <span class="section-chip">事务中心</span>
 <h1 class="page-title">课题组事务</h1>
-<p class="page-lead">统一登录后进入对应工作台。当前已开放“周报提交”“资料下载”和“AutoPaperReport 自动论文报道”模块，可自动检索最新论文并发送邮件。</p>
+<p class="page-lead">统一登录后进入对应工作台。成员可提交周报与阅读报告、下载资料并维护个人资料。</p>
 </div>
 </div>
 </section>
@@ -64,17 +64,17 @@
 <div class="upload-mask" data-upload-mask="" hidden="">
 <div class="upload-dialog">
 <div class="upload-spinner" aria-hidden="true"></div>
-<strong>上传中...</strong>
+<strong>报告上传中...</strong>
 <span>文件正在提交到服务器，请不要关闭页面。</span>
 </div>
 </div>
 <div class="affairs-login-layout reveal" data-report-gate="">
 <aside class="affairs-module-card">
 <span class="section-chip">模块</span>
-<h2>周报提交</h2>
-<p data-current-week-text="">当前周次将根据日期自动更新。成员可按周提交或重新覆盖上传，管理员可集中查看、下载与打包归档。</p>
+<h2>报告提交</h2>
+<p data-current-week-text="">当前周次将根据日期自动更新。成员可选择提交周报或阅读报告，并在提交记录中查看归档。</p>
 <div class="affairs-module-list">
-<span class="active">周报提交</span>
+<span class="active">周报 / 阅读报告</span>
 <span>更多事务模块待接入</span>
 </div>
 </aside>
@@ -91,11 +91,17 @@
 </div>
 
 <div class="report-workspace" data-user-panel="" hidden="">
-<div class="affairs-appbar">
+<div class="affairs-appbar user-appbar">
+<div class="user-identity">
+<div class="profile-avatar profile-avatar-lg" data-avatar-view="">
+<img alt="用户头像" data-avatar-image="" hidden=""/>
+<span data-avatar-fallback="">成员</span>
+</div>
 <div>
-<span class="section-chip">用户工作台</span>
-<h1>课题组事务</h1>
+<span class="section-chip">成员工作台</span>
+<h1 data-user-greeting="">课题组事务</h1>
 <p data-current-user=""></p>
+</div>
 </div>
 <button class="btn-secondary" data-report-logout="" type="button">退出登录</button>
 </div>
@@ -106,7 +112,7 @@
 <h2>事务模块</h2>
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
-<a class="active" href="#weekly-upload">周报提交</a>
+<a class="active" href="#weekly-upload">提交报告</a>
 <a href="#my-reports">提交记录</a>
 <a href="#material-downloads">资料下载</a>
 <a href="#profile-settings">个人信息</a>
@@ -114,7 +120,7 @@
 <span>更多模块待接入</span>
 </nav>
 </aside>
-<section class="affairs-main">
+<section class="affairs-main user-affairs-main">
 <article class="report-panel reveal" id="profile-settings">
 <div class="report-panel-head">
 <div>
@@ -124,6 +130,22 @@
 </div>
 </div>
 <form class="profile-form" data-profile-form="">
+<div class="avatar-editor">
+<div class="profile-avatar profile-avatar-xl" data-avatar-view="">
+<img alt="当前头像" data-avatar-image="" hidden=""/>
+<span data-avatar-fallback="">成员</span>
+</div>
+<div class="avatar-editor-body">
+<label class="form-label" for="profileAvatar">个人头像</label>
+<input accept="image/jpeg,image/png,image/webp,image/gif" class="form-input report-file-input" id="profileAvatar" name="avatar" type="file"/>
+<p class="form-helper">支持 JPG、PNG、WebP 或 GIF，文件不超过 3 MB。</p>
+<div class="avatar-actions">
+<button class="btn-primary" data-avatar-upload="" type="button">更新头像</button>
+<button class="btn-secondary" data-avatar-remove="" type="button">移除头像</button>
+</div>
+<p class="form-message" data-avatar-message=""></p>
+</div>
+</div>
 <div class="profile-grid">
 <label class="form-label" for="displayName">姓名</label>
 <input class="form-input" id="displayName" name="displayName" placeholder="请输入姓名" type="text"/>
@@ -172,15 +194,23 @@
 <article class="report-panel reveal" id="weekly-upload">
 <div class="report-panel-head">
 <div>
-<span class="section-chip">周报提交</span>
-<h2>上传本周周报</h2>
-<p>建议优先上传 PDF 版本，便于管理员在线预览；同一账号同一周再次提交会覆盖原周报。</p>
+<span class="section-chip">报告提交</span>
+<h2>上传新报告</h2>
+<p data-upload-guidance="">选择报告类型后上传文件。同一账号、类型和周次再次提交时将覆盖原文件。</p>
 </div>
 </div>
 <form class="report-form" data-upload-form="">
-<label class="form-label" for="reportName">提交账号</label>
+<div class="report-form-grid">
+<label class="report-field" for="reportName"><span>提交账号</span>
 <input class="form-input" id="reportName" name="name" readonly="" required="" type="text"/>
-<label class="form-label" for="reportWeek">周次</label>
+</label>
+<label class="report-field" for="reportType"><span>报告类型</span>
+<select class="form-input" data-report-type="" id="reportType" name="reportType" required="">
+<option selected="" value="周报">周报</option>
+<option value="阅读报告">阅读报告</option>
+</select>
+</label>
+<label class="report-field report-field-wide" for="reportWeek"><span>归档周次</span>
 <select class="form-input" data-week-select="" id="reportWeek" name="week" required="">
 <option selected="" value="第1周：2026/5/4 - 2026/5/10">第1周：2026/5/4 - 2026/5/10</option>
 <option value="第2周：2026/5/11 - 2026/5/17">第2周：2026/5/11 - 2026/5/17</option>
@@ -191,19 +221,22 @@
 <option value="第7周：2026/6/15 - 2026/6/21">第7周：2026/6/15 - 2026/6/21</option>
 <option value="第8周：2026/6/22 - 2026/6/28">第8周：2026/6/22 - 2026/6/28</option>
 </select>
-<label class="form-label" for="reportFile">周报文件</label>
+</label>
+<label class="report-field report-field-wide" for="reportFile"><span>报告文件</span>
 <input accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="form-input report-file-input" id="reportFile" name="file" required="" type="file"/>
+</label>
 <p class="report-tip">优先上传 PDF 版本。文件将提交到服务器/仓库存储接口，未配置接口时不会保存在本浏览器。</p>
-<button class="btn-primary" type="submit">提交周报</button>
+<div class="report-submit-row"><button class="btn-primary" data-upload-submit="" type="submit">提交周报</button></div>
 <p class="form-message" data-upload-message=""></p>
+</div>
 </form>
 </article>
 <article class="report-panel reveal" id="my-reports">
 <div class="report-panel-head">
 <div>
 <span class="section-chip">提交记录</span>
-<h2>我的历史周报</h2>
-<p>这里显示当前账号已经提交过的周报记录，可在线查看或下载。</p>
+<h2>我的提交记录</h2>
+<p>周报和阅读报告将按最新提交时间统一归档。</p>
 </div>
 </div>
 <div class="user-history-list" data-user-history="">
@@ -259,7 +292,7 @@
 <h2>管理模块</h2>
 </div>
 <nav class="affairs-side-nav" aria-label="事务模块">
-<a class="active" href="#weekly-admin">周报管理</a>
+<a class="active" href="#weekly-admin">报告管理</a>
 <a href="#user-admin">成员资料</a>
 <a href="#paper-admin">自动论文报道</a>
 <a href="#material-admin">资料管理</a>
@@ -278,14 +311,14 @@
 </aside>
 <section class="affairs-main" id="weekly-admin">
 <div class="report-dashboard">
-<article class="metric-card"><span>当前模块</span><strong>周报</strong></article>
+<article class="metric-card"><span>当前模块</span><strong>报告</strong></article>
 <article class="metric-card"><span>已提交</span><strong data-report-count="">0</strong></article>
 <article class="metric-card"><span>当前周次</span><strong class="metric-small" data-current-week-label="">第1周</strong></article>
 </div>
 <article class="report-panel reveal">
 <div class="report-panel-head">
 <div>
-<span class="section-chip">周报管理</span>
+<span class="section-chip">报告管理</span>
 <h2>提交列表</h2>
 </div>
 <div class="report-toolbar">
@@ -307,13 +340,20 @@
 <option value="第8周">第8周</option>
 </select>
 </label>
+<label class="filter-field">类型
+<select class="form-input" data-filter-type="">
+<option value="">全部类型</option>
+<option value="周报">周报</option>
+<option value="阅读报告">阅读报告</option>
+</select>
+</label>
 <button class="btn-secondary" data-download-selected="" type="button">打包下载</button>
 <button class="btn-danger" data-delete-selected="" type="button">删除所选</button>
 <span data-selected-count="">未选择文件</span>
 </div>
 </div>
 <div class="report-list" data-report-list="">
-<div class="report-empty">暂无周报记录。</div>
+<div class="report-empty">暂无报告记录。</div>
 </div>
 </article>
 <article class="report-panel reveal" id="user-admin">
@@ -321,7 +361,7 @@
 <div>
 <span class="section-chip">成员资料</span>
 <h2>用户信息管理</h2>
-<p>成员资料保存在云端数据库中，和周报文件一样可跨设备使用。</p>
+<p>成员资料保存在云端数据库中，和报告文件一样可跨设备使用。</p>
 </div>
 </div>
 <form class="admin-user-form" data-admin-user-form="">
