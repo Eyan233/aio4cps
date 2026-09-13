@@ -318,7 +318,9 @@
     let currentUser = null;
     let cachedReports = [];
     let cloudUsers = [];
-    const weekBase = new Date(2026, 4, 4);
+    const academicTermLabel = "26-27(1)";
+    const academicTermCode = "26-27-1";
+    const weekBase = new Date(2026, 8, 7);
     const msPerDay = 24 * 60 * 60 * 1000;
 
     const addDays = (date, days)=>{
@@ -338,7 +340,7 @@
     const getWeekInfo = (weekNumber)=>{
       const start = addDays(weekBase, (weekNumber - 1) * 7);
       const end = addDays(start, 6);
-      const shortLabel = `第${weekNumber}周`;
+      const shortLabel = `${academicTermLabel} 第${weekNumber}周`;
       const label = `${shortLabel}：${formatWeekDate(start)} - ${formatWeekDate(end)}`;
       return {weekNumber, start, end, shortLabel, label};
     };
@@ -737,7 +739,7 @@
       return match ? match[1] : "0";
     };
 
-    const reportIdFor = (username, reportType, week)=>`${username}-${reportType === "阅读报告" ? "reading" : "week"}-${getWeekNumber(week)}`;
+    const reportIdFor = (username, reportType, week)=>`${username}-${reportType === "阅读报告" ? "reading" : "week"}-${academicTermCode}-${getWeekNumber(week)}`;
 
     const getVisibleReports = (reports)=>{
       const latest = new Map();
